@@ -1,0 +1,1 @@
+# foody-catalog-service
