@@ -1,6 +1,6 @@
 package constants
 
-// Restaurant constants
+// Product constants
 const (
 	ProductStatusAvailable   = "available"
 	ProductStatusUnAvailable = "unavailable"

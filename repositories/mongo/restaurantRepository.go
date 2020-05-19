@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -43,7 +44,7 @@ func (db *restaurantRepository) Create(ctx context.Context,
 	insertResult, insertError := collection.InsertOne(insertCtx, restaurant)
 	if insertError != nil {
 		err := errors.NewAppError("Unable to insert restaurant to DB",
-			errors.StatusServiceUnavailable, insertError)
+			http.StatusServiceUnavailable, insertError)
 		return models.Restaurant{}, err
 	}
 
@@ -72,7 +73,7 @@ func (db *restaurantRepository) Get(ctx context.Context,
 	cursor, findError := collection.Find(findCtx, filter)
 	if findError != nil {
 		return restaurant, errors.NewAppError("Unable to get data from DB",
-			errors.StatusInternalServerError, findError)
+			http.StatusInternalServerError, findError)
 	}
 
 	cursorCtx, cursorCancel := context.WithCancel(ctx)
@@ -81,7 +82,7 @@ func (db *restaurantRepository) Get(ctx context.Context,
 	if cursor.Next(cursorCtx) {
 		decodeError := cursor.Decode(&restaurant)
 		if decodeError != nil {
-			return models.Restaurant{}, errors.NewAppError("Unable to decode categories", errors.StatusInternalServerError, decodeError)
+			return models.Restaurant{}, errors.NewAppError("Unable to decode categories", http.StatusInternalServerError, decodeError)
 		}
 	}
 	return restaurant, nil
@@ -105,7 +106,7 @@ func (db *restaurantRepository) Delete(ctx context.Context,
 
 	_, deleteErr := collection.DeleteOne(deleteCtx, filter)
 	if deleteErr != nil {
-		return errors.NewAppError("Unable to delete from DB", errors.StatusInternalServerError, deleteErr)
+		return errors.NewAppError("Unable to delete from DB", http.StatusInternalServerError, deleteErr)
 	}
 	return nil
 }
@@ -173,7 +174,7 @@ func (db *restaurantRepository) GetAllRestaurants(ctx context.Context,
 
 	cursor, findError := collection.Find(findCtx, filter, findOptions)
 	if findError != nil {
-		return restaurants, errors.NewAppError("Unable to get data from DB", errors.StatusInternalServerError, findError)
+		return restaurants, errors.NewAppError("Unable to get data from DB", http.StatusInternalServerError, findError)
 	}
 
 	cursorCtx, cursorCancel := context.WithCancel(ctx)
@@ -182,7 +183,7 @@ func (db *restaurantRepository) GetAllRestaurants(ctx context.Context,
 		var restaurant models.Restaurant
 		decodeError := cursor.Decode(&restaurant)
 		if decodeError != nil {
-			return restaurants, errors.NewAppError("Unable to decode categories", errors.StatusInternalServerError, decodeError)
+			return restaurants, errors.NewAppError("Unable to decode categories", http.StatusInternalServerError, decodeError)
 		}
 		restaurants = append(restaurants, restaurant)
 	}
@@ -237,7 +238,7 @@ func (db *restaurantRepository) GetAllRestaurantsTotalCount(ctx context.Context,
 
 	totalCount, findError := collection.CountDocuments(countCtx, filter)
 	if findError != nil {
-		return totalCount, errors.NewAppError("Unable to get data from DB", errors.StatusInternalServerError, findError)
+		return totalCount, errors.NewAppError("Unable to get data from DB", http.StatusInternalServerError, findError)
 	}
 
 	return totalCount, nil

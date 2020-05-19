@@ -2,6 +2,7 @@ package services_test
 
 import (
 	"context"
+	"net/http"
 	"reflect"
 	"testing"
 	"time"
@@ -52,7 +53,7 @@ func TestRestaurantCreate(t *testing.T) {
 				},
 			},
 			expectedResponse:          models.Restaurant{},
-			expectedError:             errors.NewAppError("Forbidden", errors.StatusForbidden, nil),
+			expectedError:             errors.NewAppError("Forbidden", http.StatusForbidden, nil),
 			createAnyPermissionResult: false,
 			createOwnPermissionResult: false,
 			repositoryRequest:         models.Restaurant{},
@@ -206,7 +207,7 @@ func TestRestaurantCreate(t *testing.T) {
 				},
 			},
 			expectedResponse:          models.Restaurant{},
-			expectedError:             errors.NewAppError("Unable to insert", errors.StatusInternalServerError, nil),
+			expectedError:             errors.NewAppError("Unable to insert", http.StatusInternalServerError, nil),
 			createAnyPermissionResult: true,
 			createOwnPermissionResult: false,
 			repositoryRequest: models.Restaurant{
@@ -220,7 +221,7 @@ func TestRestaurantCreate(t *testing.T) {
 				Status: constants.RestaurantStatusClosed,
 			},
 			repositoryResponse:      models.Restaurant{},
-			repositoryResponseError: errors.NewAppError("Unable to insert", errors.StatusInternalServerError, nil),
+			repositoryResponseError: errors.NewAppError("Unable to insert", http.StatusInternalServerError, nil),
 		},
 	}
 
@@ -285,7 +286,7 @@ func TestRestaurantGet(t *testing.T) {
 				},
 			},
 			expectedResponse:        models.Restaurant{},
-			expectedError:           errors.NewAppError("Resource not found", errors.StatusNotFound, nil),
+			expectedError:           errors.NewAppError("Resource not found", http.StatusNotFound, nil),
 			getAnyPermissionResult:  false,
 			getOwnPermissionResult:  false,
 			repositoryResponse:      models.Restaurant{},
@@ -302,7 +303,7 @@ func TestRestaurantGet(t *testing.T) {
 				},
 			},
 			expectedResponse:       models.Restaurant{},
-			expectedError:          errors.NewAppError("Forbidden", errors.StatusForbidden, nil),
+			expectedError:          errors.NewAppError("Forbidden", http.StatusForbidden, nil),
 			getAnyPermissionResult: false,
 			getOwnPermissionResult: false,
 			repositoryResponse: models.Restaurant{
@@ -433,11 +434,11 @@ func TestRestaurantGet(t *testing.T) {
 				},
 			},
 			expectedResponse:        models.Restaurant{},
-			expectedError:           errors.NewAppError("Unable to get data from DB", errors.StatusForbidden, nil),
+			expectedError:           errors.NewAppError("Unable to get data from DB", http.StatusForbidden, nil),
 			getAnyPermissionResult:  false,
 			getOwnPermissionResult:  true,
 			repositoryResponse:      models.Restaurant{},
-			repositoryResponseError: errors.NewAppError("Unable to get data from DB", errors.StatusForbidden, nil),
+			repositoryResponseError: errors.NewAppError("Unable to get data from DB", http.StatusForbidden, nil),
 		},
 	}
 
@@ -503,7 +504,7 @@ func TestRestaurantDelete(t *testing.T) {
 					RestaurantID: "5d78d4975eff2a81dda94810",
 				},
 			},
-			expectedError:                 errors.NewAppError("Resource not found", errors.StatusNotFound, nil),
+			expectedError:                 errors.NewAppError("Resource not found", http.StatusNotFound, nil),
 			deleteAnyPermissionResult:     false,
 			deleteOwnPermissionResult:     false,
 			repositoryGetResponse:         models.Restaurant{},
@@ -520,7 +521,7 @@ func TestRestaurantDelete(t *testing.T) {
 					RestaurantID: "5d78d4975eff2a81dda94810",
 				},
 			},
-			expectedError:             errors.NewAppError("Forbidden", errors.StatusForbidden, nil),
+			expectedError:             errors.NewAppError("Forbidden", http.StatusForbidden, nil),
 			deleteAnyPermissionResult: false,
 			deleteOwnPermissionResult: false,
 			repositoryGetResponse: models.Restaurant{
@@ -619,7 +620,7 @@ func TestRestaurantDelete(t *testing.T) {
 					RestaurantID: "5d78d4975eff2a81dda94810",
 				},
 			},
-			expectedError:             errors.NewAppError("Unable to get data from database", errors.StatusInternalServerError, nil),
+			expectedError:             errors.NewAppError("Unable to get data from database", http.StatusInternalServerError, nil),
 			deleteAnyPermissionResult: true,
 			deleteOwnPermissionResult: false,
 			repositoryGetResponse: models.Restaurant{
@@ -640,7 +641,7 @@ func TestRestaurantDelete(t *testing.T) {
 				UpdatedAt:  time.Date(2019, 11, 17, 20, 34, 58, 651387237, time.UTC),
 			},
 			repositoryGetResponseError:    nil,
-			repositoryDeleteResponseError: errors.NewAppError("Unable to get data from database", errors.StatusInternalServerError, nil),
+			repositoryDeleteResponseError: errors.NewAppError("Unable to get data from database", http.StatusInternalServerError, nil),
 		},
 		{
 			name: "Delete Restaurant Resource Error While Deleting",
@@ -652,7 +653,7 @@ func TestRestaurantDelete(t *testing.T) {
 					RestaurantID: "5d78d4975eff2a81dda94810",
 				},
 			},
-			expectedError:             errors.NewAppError("Unable to delete from database", errors.StatusInternalServerError, nil),
+			expectedError:             errors.NewAppError("Unable to delete from database", http.StatusInternalServerError, nil),
 			deleteAnyPermissionResult: true,
 			deleteOwnPermissionResult: false,
 			repositoryGetResponse: models.Restaurant{
@@ -673,7 +674,7 @@ func TestRestaurantDelete(t *testing.T) {
 				UpdatedAt:  time.Date(2019, 11, 17, 20, 34, 58, 651387237, time.UTC),
 			},
 			repositoryGetResponseError:    nil,
-			repositoryDeleteResponseError: errors.NewAppError("Unable to delete from database", errors.StatusInternalServerError, nil),
+			repositoryDeleteResponseError: errors.NewAppError("Unable to delete from database", http.StatusInternalServerError, nil),
 		},
 	}
 
@@ -748,7 +749,7 @@ func TestGetAllRestaurants(t *testing.T) {
 				},
 			},
 			maxDistance:                          10000,
-			expectedError:                        errors.NewAppError("Forbidden", errors.StatusForbidden, nil),
+			expectedError:                        errors.NewAppError("Forbidden", http.StatusForbidden, nil),
 			expectedResponse:                     dto.GetAllRestaurantsResponse{},
 			getAnyPermissionResult:               false,
 			getOwnPermissionResult:               false,
@@ -769,7 +770,7 @@ func TestGetAllRestaurants(t *testing.T) {
 				},
 			},
 			maxDistance:                          10000,
-			expectedError:                        errors.NewAppError("Forbidden", errors.StatusForbidden, nil),
+			expectedError:                        errors.NewAppError("Forbidden", http.StatusForbidden, nil),
 			expectedResponse:                     dto.GetAllRestaurantsResponse{},
 			getAnyPermissionResult:               false,
 			getOwnPermissionResult:               false,

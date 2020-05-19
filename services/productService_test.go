@@ -2,6 +2,7 @@ package services_test
 
 import (
 	"context"
+	"net/http"
 	"testing"
 	"time"
 
@@ -10,8 +11,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 
-	"github.com/dhyaniarun1993/foody-common/errors"
-	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/dhyaniarun1993/foody-catalog-service/acl"
 	mockacl "github.com/dhyaniarun1993/foody-catalog-service/acl/mocks"
 	"github.com/dhyaniarun1993/foody-catalog-service/constants"
@@ -20,6 +19,8 @@ import (
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
 	"github.com/dhyaniarun1993/foody-catalog-service/services"
 	mockservices "github.com/dhyaniarun1993/foody-catalog-service/services/mocks"
+	"github.com/dhyaniarun1993/foody-common/errors"
+	"github.com/dhyaniarun1993/foody-common/logger"
 )
 
 func toObjectID(id string) primitive.ObjectID {
@@ -58,7 +59,7 @@ func TestProductCreate(t *testing.T) {
 				},
 			},
 			expectedResponse:          models.Product{},
-			expectedError:             errors.NewAppError("Forbidden", errors.StatusForbidden, nil),
+			expectedError:             errors.NewAppError("Forbidden", http.StatusForbidden, nil),
 			createAnyPermissionResult: false,
 			createOwnPermissionResult: false,
 			restaurantServiceResponse: models.Restaurant{
@@ -100,11 +101,11 @@ func TestProductCreate(t *testing.T) {
 				},
 			},
 			expectedResponse:          models.Product{},
-			expectedError:             errors.NewAppError("Unable to get restaurant data", errors.StatusInternalServerError, nil),
+			expectedError:             errors.NewAppError("Unable to get restaurant data", http.StatusInternalServerError, nil),
 			createAnyPermissionResult: false,
 			createOwnPermissionResult: false,
 			restaurantServiceResponse: models.Restaurant{},
-			restaurantServiceError:    errors.NewAppError("Unable to get restaurant data", errors.StatusInternalServerError, nil),
+			restaurantServiceError:    errors.NewAppError("Unable to get restaurant data", http.StatusInternalServerError, nil),
 			repositoryResponse:        models.Product{},
 			repositoryResponseError:   nil,
 		},
@@ -126,7 +127,7 @@ func TestProductCreate(t *testing.T) {
 				},
 			},
 			expectedResponse:          models.Product{},
-			expectedError:             errors.NewAppError("unable to create product", errors.StatusInternalServerError, nil),
+			expectedError:             errors.NewAppError("unable to create product", http.StatusInternalServerError, nil),
 			createAnyPermissionResult: false,
 			createOwnPermissionResult: true,
 			restaurantServiceResponse: models.Restaurant{
@@ -148,7 +149,7 @@ func TestProductCreate(t *testing.T) {
 			},
 			restaurantServiceError:  nil,
 			repositoryResponse:      models.Product{},
-			repositoryResponseError: errors.NewAppError("unable to create product", errors.StatusInternalServerError, nil),
+			repositoryResponseError: errors.NewAppError("unable to create product", http.StatusInternalServerError, nil),
 		},
 		{
 			name: "Create Product Success with Own Permission",
@@ -370,7 +371,7 @@ func TestProductGet(t *testing.T) {
 				},
 			},
 			expectedResponse:       models.Product{},
-			expectedError:          errors.NewAppError("Forbidden", errors.StatusForbidden, nil),
+			expectedError:          errors.NewAppError("Forbidden", http.StatusForbidden, nil),
 			getAnyPermissionResult: false,
 			getOwnPermissionResult: false,
 			restaurantServiceResponse: models.Restaurant{
@@ -406,11 +407,11 @@ func TestProductGet(t *testing.T) {
 				},
 			},
 			expectedResponse:          models.Product{},
-			expectedError:             errors.NewAppError("Unable to get restaurant data", errors.StatusInternalServerError, nil),
+			expectedError:             errors.NewAppError("Unable to get restaurant data", http.StatusInternalServerError, nil),
 			getAnyPermissionResult:    false,
 			getOwnPermissionResult:    false,
 			restaurantServiceResponse: models.Restaurant{},
-			restaurantServiceError:    errors.NewAppError("Unable to get restaurant data", errors.StatusInternalServerError, nil),
+			restaurantServiceError:    errors.NewAppError("Unable to get restaurant data", http.StatusInternalServerError, nil),
 			repositoryResponse:        models.Product{},
 			repositoryResponseError:   nil,
 		},
@@ -426,7 +427,7 @@ func TestProductGet(t *testing.T) {
 				},
 			},
 			expectedResponse:       models.Product{},
-			expectedError:          errors.NewAppError("Unable to get product data", errors.StatusInternalServerError, nil),
+			expectedError:          errors.NewAppError("Unable to get product data", http.StatusInternalServerError, nil),
 			getAnyPermissionResult: false,
 			getOwnPermissionResult: true,
 			restaurantServiceResponse: models.Restaurant{
@@ -448,7 +449,7 @@ func TestProductGet(t *testing.T) {
 			},
 			restaurantServiceError:  nil,
 			repositoryResponse:      models.Product{},
-			repositoryResponseError: errors.NewAppError("Unable to get product data", errors.StatusInternalServerError, nil),
+			repositoryResponseError: errors.NewAppError("Unable to get product data", http.StatusInternalServerError, nil),
 		},
 		{
 			name: "Get Product Error Not Found",
@@ -462,7 +463,7 @@ func TestProductGet(t *testing.T) {
 				},
 			},
 			expectedResponse:       models.Product{},
-			expectedError:          errors.NewAppError("Resource not found", errors.StatusNotFound, nil),
+			expectedError:          errors.NewAppError("Resource not found", http.StatusNotFound, nil),
 			getAnyPermissionResult: false,
 			getOwnPermissionResult: true,
 			restaurantServiceResponse: models.Restaurant{
@@ -680,7 +681,7 @@ func TestProductDelete(t *testing.T) {
 					ProductID:    "5d78d4975eff2a81dda94819",
 				},
 			},
-			expectedError:             errors.NewAppError("Forbidden", errors.StatusForbidden, nil),
+			expectedError:             errors.NewAppError("Forbidden", http.StatusForbidden, nil),
 			deleteAnyPermissionResult: false,
 			deleteOwnPermissionResult: false,
 			restaurantServiceResponse: models.Restaurant{
@@ -714,11 +715,11 @@ func TestProductDelete(t *testing.T) {
 					ProductID:    "5d78d4975eff2a81dda94819",
 				},
 			},
-			expectedError:             errors.NewAppError("Unable to get restaurant data", errors.StatusInternalServerError, nil),
+			expectedError:             errors.NewAppError("Unable to get restaurant data", http.StatusInternalServerError, nil),
 			deleteAnyPermissionResult: false,
 			deleteOwnPermissionResult: false,
 			restaurantServiceResponse: models.Restaurant{},
-			restaurantServiceError:    errors.NewAppError("Unable to get restaurant data", errors.StatusInternalServerError, nil),
+			restaurantServiceError:    errors.NewAppError("Unable to get restaurant data", http.StatusInternalServerError, nil),
 			repositoryResponseError:   nil,
 		},
 		{
@@ -732,7 +733,7 @@ func TestProductDelete(t *testing.T) {
 					ProductID:    "5d78d4975eff2a81dda94819",
 				},
 			},
-			expectedError:             errors.NewAppError("Unable to get product data", errors.StatusInternalServerError, nil),
+			expectedError:             errors.NewAppError("Unable to get product data", http.StatusInternalServerError, nil),
 			deleteAnyPermissionResult: false,
 			deleteOwnPermissionResult: true,
 			restaurantServiceResponse: models.Restaurant{
@@ -753,7 +754,7 @@ func TestProductDelete(t *testing.T) {
 				UpdatedAt:  time.Date(2019, 11, 17, 20, 34, 58, 651387237, time.UTC),
 			},
 			restaurantServiceError:  nil,
-			repositoryResponseError: errors.NewAppError("Unable to get product data", errors.StatusInternalServerError, nil),
+			repositoryResponseError: errors.NewAppError("Unable to get product data", http.StatusInternalServerError, nil),
 		},
 		{
 			name: "Delete Product Success With Own Permission",

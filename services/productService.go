@@ -3,18 +3,19 @@ package services
 import (
 	"context"
 	"math"
+	"net/http"
 	"reflect"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/dhyaniarun1993/foody-common/async"
-	"github.com/dhyaniarun1993/foody-common/errors"
-	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/dhyaniarun1993/foody-catalog-service/acl"
 	"github.com/dhyaniarun1993/foody-catalog-service/constants"
 	"github.com/dhyaniarun1993/foody-catalog-service/repositories"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/dto"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
+	"github.com/dhyaniarun1993/foody-common/async"
+	"github.com/dhyaniarun1993/foody-common/errors"
+	"github.com/dhyaniarun1993/foody-common/logger"
 )
 
 type productService struct {
@@ -70,7 +71,7 @@ func (service *productService) Create(ctx context.Context,
 		product, createProductError = service.productRepository.Create(ctx, product)
 		return product, createProductError
 	}
-	return models.Product{}, errors.NewAppError("Forbidden", errors.StatusForbidden, nil)
+	return models.Product{}, errors.NewAppError("Forbidden", http.StatusForbidden, nil)
 
 }
 
@@ -100,11 +101,11 @@ func (service *productService) Get(ctx context.Context,
 		}
 
 		if reflect.DeepEqual(product, models.Product{}) {
-			return models.Product{}, errors.NewAppError("Resource not found", errors.StatusNotFound, nil)
+			return models.Product{}, errors.NewAppError("Resource not found", http.StatusNotFound, nil)
 		}
 		return product, nil
 	}
-	return models.Product{}, errors.NewAppError("Forbidden", errors.StatusForbidden, nil)
+	return models.Product{}, errors.NewAppError("Forbidden", http.StatusForbidden, nil)
 }
 
 func (service *productService) Delete(ctx context.Context,
@@ -130,7 +131,7 @@ func (service *productService) Delete(ctx context.Context,
 			request.Param.ProductID, request.Param.RestaurantID)
 		return repositoryError
 	}
-	return errors.NewAppError("Forbidden", errors.StatusForbidden, nil)
+	return errors.NewAppError("Forbidden", http.StatusForbidden, nil)
 }
 
 func (service *productService) GetAllProducts(ctx context.Context,
@@ -195,5 +196,5 @@ func (service *productService) GetAllProducts(ctx context.Context,
 		}
 		return productResponse, nil
 	}
-	return productResponse, errors.NewAppError("Forbidden", errors.StatusForbidden, nil)
+	return productResponse, errors.NewAppError("Forbidden", http.StatusForbidden, nil)
 }

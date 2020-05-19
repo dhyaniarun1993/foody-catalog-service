@@ -10,10 +10,10 @@ import (
 
 	"github.com/golang/mock/gomock"
 
-	"github.com/dhyaniarun1993/foody-common/errors"
-	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/dhyaniarun1993/foody-catalog-service/controllers"
 	services "github.com/dhyaniarun1993/foody-catalog-service/services/mocks"
+	"github.com/dhyaniarun1993/foody-common/errors"
+	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +25,7 @@ func TestControllerHealthCheck(t *testing.T) {
 		serviceResponseError errors.AppError
 	}{
 		{name: "HealthCheck OK", expectedResponse: ``, expectedStatusCode: http.StatusOK, serviceResponseError: nil},
-		{name: "HealthCheck Error From Service", expectedResponse: `{"message": "database down"}`, expectedStatusCode: http.StatusInternalServerError, serviceResponseError: errors.NewAppError("database down", errors.StatusInternalServerError, nil)},
+		{name: "HealthCheck Error From Service", expectedResponse: `{"message": "database down"}`, expectedStatusCode: http.StatusInternalServerError, serviceResponseError: errors.NewAppError("database down", http.StatusInternalServerError, nil)},
 	}
 
 	logger := logger.CreateLogger(logger.Configuration{

@@ -2,9 +2,10 @@ package dto
 
 import (
 	"fmt"
+	"net/http"
 
-	"github.com/dhyaniarun1993/foody-common/errors"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
+	"github.com/dhyaniarun1993/foody-common/errors"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -43,13 +44,13 @@ func (dto CreateRestaurantRequest) Validate(validate *validator.Validate) errors
 			errMessage = fmt.Sprintf("validation for field '%s' failed on '%s'", err.Field(), err.Tag())
 			break
 		}
-		return errors.NewAppError(errMessage, errors.StatusBadRequest, err)
+		return errors.NewAppError(errMessage, http.StatusBadRequest, err)
 	}
 	if dto.Body.Address.Location.Coordinates[0] < -180 || dto.Body.Address.Location.Coordinates[0] > 180 {
-		return errors.NewAppError("Invalid longitude", errors.StatusBadRequest, err)
+		return errors.NewAppError("Invalid longitude", http.StatusBadRequest, err)
 	}
 	if dto.Body.Address.Location.Coordinates[1] < -90 || dto.Body.Address.Location.Coordinates[1] > 90 {
-		return errors.NewAppError("Invalid latitude", errors.StatusBadRequest, err)
+		return errors.NewAppError("Invalid latitude", http.StatusBadRequest, err)
 	}
 	return nil
 }
@@ -76,7 +77,7 @@ func (dto GetRestaurantRequest) Validate(validate *validator.Validate) errors.Ap
 			errMessage = fmt.Sprintf("validation for field '%s' failed on '%s'", err.Field(), err.Tag())
 			break
 		}
-		return errors.NewAppError(errMessage, errors.StatusBadRequest, err)
+		return errors.NewAppError(errMessage, http.StatusBadRequest, err)
 	}
 	return nil
 }
@@ -103,7 +104,7 @@ func (dto DeleteRestaurantRequest) Validate(validate *validator.Validate) errors
 			errMessage = fmt.Sprintf("validation for field '%s' failed on '%s'", err.Field(), err.Tag())
 			break
 		}
-		return errors.NewAppError(errMessage, errors.StatusBadRequest, err)
+		return errors.NewAppError(errMessage, http.StatusBadRequest, err)
 	}
 	return nil
 }
@@ -135,7 +136,7 @@ func (dto GetAllRestaurantsRequest) Validate(validate *validator.Validate) error
 			errMessage = fmt.Sprintf("validation for field '%s' failed on '%s'", err.Field(), err.Tag())
 			break
 		}
-		return errors.NewAppError(errMessage, errors.StatusBadRequest, err)
+		return errors.NewAppError(errMessage, http.StatusBadRequest, err)
 	}
 	return nil
 }

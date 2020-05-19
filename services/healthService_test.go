@@ -2,14 +2,15 @@ package services_test
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 
-	"github.com/dhyaniarun1993/foody-common/errors"
-	"github.com/dhyaniarun1993/foody-common/logger"
 	mockrepositories "github.com/dhyaniarun1993/foody-catalog-service/repositories/mocks"
 	"github.com/dhyaniarun1993/foody-catalog-service/services"
+	"github.com/dhyaniarun1993/foody-common/errors"
+	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +20,7 @@ func TestServiceHealthCheck(t *testing.T) {
 		repositoryError errors.AppError
 	}{
 		{name: "Success From Service", repositoryError: nil},
-		{name: "Error From Service", repositoryError: errors.NewAppError("error from repository", errors.StatusInternalServerError, nil)},
+		{name: "Error From Service", repositoryError: errors.NewAppError("error from repository", http.StatusInternalServerError, nil)},
 	}
 
 	logger := logger.CreateLogger(logger.Configuration{

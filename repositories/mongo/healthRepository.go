@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/dhyaniarun1993/foody-catalog-service/repositories"
@@ -24,7 +25,7 @@ func (mongo *healthRepository) HealthCheck(ctx context.Context) errors.AppError 
 	defer pingCancel()
 	pingError := mongo.Ping(timedCtx, readpref.Primary())
 	if pingError != nil {
-		return errors.NewAppError("Unable to connect to MongoDB", errors.StatusServiceUnavailable, pingError)
+		return errors.NewAppError("Unable to connect to MongoDB", http.StatusServiceUnavailable, pingError)
 	}
 	return nil
 }

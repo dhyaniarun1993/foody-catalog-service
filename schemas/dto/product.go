@@ -2,10 +2,11 @@ package dto
 
 import (
 	"fmt"
+	"net/http"
 
-	"github.com/dhyaniarun1993/foody-common/errors"
 	"github.com/dhyaniarun1993/foody-catalog-service/constants"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
+	"github.com/dhyaniarun1993/foody-common/errors"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -41,12 +42,12 @@ func (dto CreateProductRequest) Validate(validate *validator.Validate) errors.Ap
 			errMsg = fmt.Sprintf("validation for field '%s' failed on '%s'", err.Field(), err.Tag())
 			break
 		}
-		return errors.NewAppError(errMsg, errors.StatusBadRequest, err)
+		return errors.NewAppError(errMsg, http.StatusBadRequest, err)
 	}
 
 	if dto.Body.DiscountType != constants.ProductDiscountTypeFlat &&
 		dto.Body.DiscountType != constants.ProductDiscountTypePercentage {
-		return errors.NewAppError("Invalid value for `discount_type`", errors.StatusBadRequest, nil)
+		return errors.NewAppError("Invalid value for `discount_type`", http.StatusBadRequest, nil)
 	}
 	return nil
 }
@@ -74,7 +75,7 @@ func (dto GetProductRequest) Validate(validate *validator.Validate) errors.AppEr
 			errMessage = fmt.Sprintf("validation for field '%s' failed on '%s'", err.Field(), err.Tag())
 			break
 		}
-		return errors.NewAppError(errMessage, errors.StatusBadRequest, err)
+		return errors.NewAppError(errMessage, http.StatusBadRequest, err)
 	}
 	return nil
 }
@@ -102,7 +103,7 @@ func (dto DeleteProductRequest) Validate(validate *validator.Validate) errors.Ap
 			errMessage = fmt.Sprintf("validation for field '%s' failed on '%s'", err.Field(), err.Tag())
 			break
 		}
-		return errors.NewAppError(errMessage, errors.StatusBadRequest, err)
+		return errors.NewAppError(errMessage, http.StatusBadRequest, err)
 	}
 	return nil
 }
@@ -137,7 +138,7 @@ func (dto GetAllProductsRequest) Validate(validate *validator.Validate) errors.A
 			errMessage = fmt.Sprintf("validation for field '%s' failed on '%s'", err.Field(), err.Tag())
 			break
 		}
-		return errors.NewAppError(errMessage, errors.StatusBadRequest, err)
+		return errors.NewAppError(errMessage, http.StatusBadRequest, err)
 	}
 	return nil
 }

@@ -3,17 +3,18 @@ package services
 import (
 	"context"
 	"math"
+	"net/http"
 	"reflect"
 
 	"github.com/dhyaniarun1993/foody-catalog-service/acl"
 
-	"github.com/dhyaniarun1993/foody-common/async"
-	"github.com/dhyaniarun1993/foody-common/errors"
-	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/dhyaniarun1993/foody-catalog-service/constants"
 	"github.com/dhyaniarun1993/foody-catalog-service/repositories"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/dto"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
+	"github.com/dhyaniarun1993/foody-common/async"
+	"github.com/dhyaniarun1993/foody-common/errors"
+	"github.com/dhyaniarun1993/foody-common/logger"
 )
 
 type restaurantService struct {
@@ -52,7 +53,7 @@ func (service *restaurantService) Create(ctx context.Context,
 		restaurant, repositoryError = service.restaurantRepository.Create(ctx, restaurant)
 		return restaurant, repositoryError
 	}
-	return models.Restaurant{}, errors.NewAppError("Forbidden", errors.StatusForbidden, nil)
+	return models.Restaurant{}, errors.NewAppError("Forbidden", http.StatusForbidden, nil)
 }
 
 func (service *restaurantService) Get(ctx context.Context,
@@ -64,7 +65,7 @@ func (service *restaurantService) Get(ctx context.Context,
 	}
 
 	if reflect.DeepEqual(restaurant, models.Restaurant{}) {
-		return restaurant, errors.NewAppError("Resource not found", errors.StatusNotFound, nil)
+		return restaurant, errors.NewAppError("Resource not found", http.StatusNotFound, nil)
 	}
 
 	if (request.UserID == restaurant.MerchantID && service.rbac.Can(request.UserRole, acl.PermissionGetRestaurantOwn)) ||
@@ -72,7 +73,7 @@ func (service *restaurantService) Get(ctx context.Context,
 		return restaurant, nil
 	}
 
-	return models.Restaurant{}, errors.NewAppError("Forbidden", errors.StatusForbidden, nil)
+	return models.Restaurant{}, errors.NewAppError("Forbidden", http.StatusForbidden, nil)
 }
 
 func (service *restaurantService) Delete(ctx context.Context,
@@ -84,7 +85,7 @@ func (service *restaurantService) Delete(ctx context.Context,
 	}
 
 	if reflect.DeepEqual(restaurant, models.Restaurant{}) {
-		return errors.NewAppError("Resource not found", errors.StatusNotFound, nil)
+		return errors.NewAppError("Resource not found", http.StatusNotFound, nil)
 	}
 
 	if (request.UserID == restaurant.MerchantID && service.rbac.Can(request.UserRole, acl.PermissionDeleteRestaurantOwn)) ||
@@ -93,7 +94,7 @@ func (service *restaurantService) Delete(ctx context.Context,
 		deleteError := service.restaurantRepository.Delete(ctx, request.Param.RestaurantID)
 		return deleteError
 	}
-	return errors.NewAppError("Forbidden", errors.StatusForbidden, nil)
+	return errors.NewAppError("Forbidden", http.StatusForbidden, nil)
 }
 
 func (service *restaurantService) GetAllRestaurants(ctx context.Context,
@@ -146,5 +147,5 @@ func (service *restaurantService) GetAllRestaurants(ctx context.Context,
 		}
 		return restaurantResponse, nil
 	}
-	return restaurantResponse, errors.NewAppError("Forbidden", errors.StatusForbidden, nil)
+	return restaurantResponse, errors.NewAppError("Forbidden", http.StatusForbidden, nil)
 }
