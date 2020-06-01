@@ -1,4 +1,4 @@
-package controllers_test
+package controllers
 
 import (
 	"bytes"
@@ -10,7 +10,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 
-	"github.com/dhyaniarun1993/foody-catalog-service/controllers"
 	services "github.com/dhyaniarun1993/foody-catalog-service/services/mocks"
 	"github.com/dhyaniarun1993/foody-common/errors"
 	"github.com/dhyaniarun1993/foody-common/logger"
@@ -46,9 +45,9 @@ func TestControllerHealthCheck(t *testing.T) {
 			mockHealthService := services.NewMockHealthService(ctrl)
 			mockHealthService.EXPECT().HealthCheck(context.TODO()).Return(testData.serviceResponseError)
 
-			healthController := controllers.NewHealthController(mockHealthService, logger)
+			healthController := &healthController{mockHealthService, logger}
 
-			healthController.HealthCheck(recorder, req)
+			healthController.healthCheck(recorder, req)
 
 			res := recorder.Result()
 			defer res.Body.Close()

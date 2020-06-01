@@ -10,11 +10,11 @@ import (
 	"github.com/gorilla/schema"
 	"gopkg.in/go-playground/validator.v9"
 
+	"github.com/dhyaniarun1993/foody-catalog-service/schemas/dto"
+	"github.com/dhyaniarun1993/foody-catalog-service/services"
 	"github.com/dhyaniarun1993/foody-common/authentication"
 	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/dhyaniarun1993/foody-common/middlewares"
-	"github.com/dhyaniarun1993/foody-catalog-service/schemas/dto"
-	"github.com/dhyaniarun1993/foody-catalog-service/services"
 )
 
 type restaurantController struct {
@@ -41,45 +41,46 @@ func NewRestaurantController(restaurantService services.RestaurantService,
 
 func (controller *restaurantController) LoadRoutes(router *mux.Router) {
 	router.Handle("/v1/catalog/restaurants",
-		middlewares.ChainHandlerFuncMiddlewares(controller.CreateRestaurant,
+		middlewares.ChainHandlerFuncMiddlewares(controller.createRestaurant,
 			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("POST")
 
 	router.Handle("/v1/catalog/restaurants/{restaurantId}",
-		middlewares.ChainHandlerFuncMiddlewares(controller.GetRestaurant,
+		middlewares.ChainHandlerFuncMiddlewares(controller.getRestaurant,
 			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("GET")
 
 	router.Handle("/v1/catalog/restaurants/{restaurantId}",
-		middlewares.ChainHandlerFuncMiddlewares(controller.DeleteRestaurant,
+		middlewares.ChainHandlerFuncMiddlewares(controller.deleteRestaurant,
 			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("DELETE")
 
 	router.Handle("/v1/catalog/restaurants",
-		middlewares.ChainHandlerFuncMiddlewares(controller.GetAllRestaurants,
+		middlewares.ChainHandlerFuncMiddlewares(controller.getAllRestaurants,
 			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("GET")
 
 	router.Handle("/v1/catalog/restaurants/{restaurantId}/products",
-		middlewares.ChainHandlerFuncMiddlewares(controller.CreateProduct,
+		middlewares.ChainHandlerFuncMiddlewares(controller.createProduct,
 			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("POST")
 
 	router.Handle("/v1/catalog/restaurants/{restaurantId}/products/{productId}",
-		middlewares.ChainHandlerFuncMiddlewares(controller.GetProduct,
+		middlewares.ChainHandlerFuncMiddlewares(controller.getProduct,
 			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("GET")
 
 	router.Handle("/v1/catalog/restaurants/{restaurantId}/products/{productId}",
-		middlewares.ChainHandlerFuncMiddlewares(controller.DeleteProduct,
+		middlewares.ChainHandlerFuncMiddlewares(controller.deleteProduct,
 			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("DELETE")
 
 	router.Handle("/v1/catalog/restaurants/{restaurantId}/products",
-		middlewares.ChainHandlerFuncMiddlewares(controller.GetAllProducts,
+		middlewares.ChainHandlerFuncMiddlewares(controller.getAllProducts,
 			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("GET")
 }
 
-func (controller *restaurantController) CreateRestaurant(w http.ResponseWriter, r *http.Request) {
+func (controller *restaurantController) createRestaurant(w http.ResponseWriter, r *http.Request) {
 	var requestBody dto.CreateRestaurantRequestBody
 	var request dto.CreateRestaurantRequest
 	ctx := r.Context()
-	request.UserID, _ = authentication.GetUserID(ctx)
-	request.UserRole, _ = authentication.GetUserRole(ctx)
-	request.AppID, _ = authentication.GetAppID(ctx)
+	auth, _ := authentication.GetAuthFromContext(ctx)
+	request.UserID = auth.GetUserID()
+	request.UserRole = auth.GetUserRole()
+	request.AppID = auth.GetClientID()
 	logger := controller.logger.WithContext(ctx)
 
 	decodingError := json.NewDecoder(r.Body).Decode(&requestBody)
@@ -116,12 +117,13 @@ func (controller *restaurantController) CreateRestaurant(w http.ResponseWriter, 
 	json.NewEncoder(w).Encode(result)
 }
 
-func (controller *restaurantController) GetRestaurant(w http.ResponseWriter, r *http.Request) {
+func (controller *restaurantController) getRestaurant(w http.ResponseWriter, r *http.Request) {
 	var request dto.GetRestaurantRequest
 	ctx := r.Context()
-	request.UserID, _ = authentication.GetUserID(ctx)
-	request.UserRole, _ = authentication.GetUserRole(ctx)
-	request.AppID, _ = authentication.GetAppID(ctx)
+	auth, _ := authentication.GetAuthFromContext(ctx)
+	request.UserID = auth.GetUserID()
+	request.UserRole = auth.GetUserRole()
+	request.AppID = auth.GetClientID()
 	logger := controller.logger.WithContext(ctx)
 	params := mux.Vars(r)
 	request.Param.RestaurantID = params["restaurantId"]
@@ -149,12 +151,13 @@ func (controller *restaurantController) GetRestaurant(w http.ResponseWriter, r *
 	json.NewEncoder(w).Encode(result)
 }
 
-func (controller *restaurantController) DeleteRestaurant(w http.ResponseWriter, r *http.Request) {
+func (controller *restaurantController) deleteRestaurant(w http.ResponseWriter, r *http.Request) {
 	var request dto.DeleteRestaurantRequest
 	ctx := r.Context()
-	request.UserID, _ = authentication.GetUserID(ctx)
-	request.UserRole, _ = authentication.GetUserRole(ctx)
-	request.AppID, _ = authentication.GetAppID(ctx)
+	auth, _ := authentication.GetAuthFromContext(ctx)
+	request.UserID = auth.GetUserID()
+	request.UserRole = auth.GetUserRole()
+	request.AppID = auth.GetClientID()
 	logger := controller.logger.WithContext(ctx)
 	params := mux.Vars(r)
 	request.Param.RestaurantID = params["restaurantId"]
@@ -181,13 +184,14 @@ func (controller *restaurantController) DeleteRestaurant(w http.ResponseWriter, 
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (controller *restaurantController) GetAllRestaurants(w http.ResponseWriter, r *http.Request) {
+func (controller *restaurantController) getAllRestaurants(w http.ResponseWriter, r *http.Request) {
 	var queryParams dto.GetAllRestaurantsRequestQuery
 	var request dto.GetAllRestaurantsRequest
 	ctx := r.Context()
-	request.UserID, _ = authentication.GetUserID(ctx)
-	request.UserRole, _ = authentication.GetUserRole(ctx)
-	request.AppID, _ = authentication.GetAppID(ctx)
+	auth, _ := authentication.GetAuthFromContext(ctx)
+	request.UserID = auth.GetUserID()
+	request.UserRole = auth.GetUserRole()
+	request.AppID = auth.GetClientID()
 	logger := controller.logger.WithContext(ctx)
 	queryParamsData := r.URL.Query()
 
@@ -225,13 +229,14 @@ func (controller *restaurantController) GetAllRestaurants(w http.ResponseWriter,
 	json.NewEncoder(w).Encode(result)
 }
 
-func (controller *restaurantController) CreateProduct(w http.ResponseWriter, r *http.Request) {
+func (controller *restaurantController) createProduct(w http.ResponseWriter, r *http.Request) {
 	var requestBody dto.CreateProductRequestBody
 	var request dto.CreateProductRequest
 	ctx := r.Context()
-	request.UserID, _ = authentication.GetUserID(ctx)
-	request.UserRole, _ = authentication.GetUserRole(ctx)
-	request.AppID, _ = authentication.GetAppID(ctx)
+	auth, _ := authentication.GetAuthFromContext(ctx)
+	request.UserID = auth.GetUserID()
+	request.UserRole = auth.GetUserRole()
+	request.AppID = auth.GetClientID()
 	logger := controller.logger.WithContext(ctx)
 	params := mux.Vars(r)
 	request.Param.RestaurantID = params["restaurantId"]
@@ -269,12 +274,13 @@ func (controller *restaurantController) CreateProduct(w http.ResponseWriter, r *
 	json.NewEncoder(w).Encode(result)
 }
 
-func (controller *restaurantController) GetProduct(w http.ResponseWriter, r *http.Request) {
+func (controller *restaurantController) getProduct(w http.ResponseWriter, r *http.Request) {
 	var request dto.GetProductRequest
 	ctx := r.Context()
-	request.UserID, _ = authentication.GetUserID(ctx)
-	request.UserRole, _ = authentication.GetUserRole(ctx)
-	request.AppID, _ = authentication.GetAppID(ctx)
+	auth, _ := authentication.GetAuthFromContext(ctx)
+	request.UserID = auth.GetUserID()
+	request.UserRole = auth.GetUserRole()
+	request.AppID = auth.GetClientID()
 	logger := controller.logger.WithContext(ctx)
 	params := mux.Vars(r)
 	request.Param.ProductID = params["productId"]
@@ -303,12 +309,13 @@ func (controller *restaurantController) GetProduct(w http.ResponseWriter, r *htt
 	json.NewEncoder(w).Encode(result)
 }
 
-func (controller *restaurantController) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+func (controller *restaurantController) deleteProduct(w http.ResponseWriter, r *http.Request) {
 	var request dto.DeleteProductRequest
 	ctx := r.Context()
-	request.UserID, _ = authentication.GetUserID(ctx)
-	request.UserRole, _ = authentication.GetUserRole(ctx)
-	request.AppID, _ = authentication.GetAppID(ctx)
+	auth, _ := authentication.GetAuthFromContext(ctx)
+	request.UserID = auth.GetUserID()
+	request.UserRole = auth.GetUserRole()
+	request.AppID = auth.GetClientID()
 	logger := controller.logger.WithContext(ctx)
 	params := mux.Vars(r)
 	request.Param.ProductID = params["productId"]
@@ -336,13 +343,14 @@ func (controller *restaurantController) DeleteProduct(w http.ResponseWriter, r *
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (controller *restaurantController) GetAllProducts(w http.ResponseWriter, r *http.Request) {
+func (controller *restaurantController) getAllProducts(w http.ResponseWriter, r *http.Request) {
 	var queryParams dto.GetAllProductsRequestQuery
 	var request dto.GetAllProductsRequest
 	ctx := r.Context()
-	request.UserID, _ = authentication.GetUserID(ctx)
-	request.UserRole, _ = authentication.GetUserRole(ctx)
-	request.AppID, _ = authentication.GetAppID(ctx)
+	auth, _ := authentication.GetAuthFromContext(ctx)
+	request.UserID = auth.GetUserID()
+	request.UserRole = auth.GetUserRole()
+	request.AppID = auth.GetClientID()
 	params := mux.Vars(r)
 	request.Param.RestaurantID = params["restaurantId"]
 	logger := controller.logger.WithContext(ctx)

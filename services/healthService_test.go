@@ -1,4 +1,4 @@
-package services_test
+package services
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"github.com/golang/mock/gomock"
 
 	mockrepositories "github.com/dhyaniarun1993/foody-catalog-service/repositories/mocks"
-	"github.com/dhyaniarun1993/foody-catalog-service/services"
 	"github.com/dhyaniarun1993/foody-common/errors"
 	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +35,7 @@ func TestServiceHealthCheck(t *testing.T) {
 			mockHealthRepository := mockrepositories.NewMockHealthRepository(ctrl)
 			mockHealthRepository.EXPECT().HealthCheck(context.TODO()).Return(testingData.repositoryError)
 
-			service := services.NewHealthService(mockHealthRepository, logger)
+			service := NewHealthService(mockHealthRepository, logger)
 			serviceError := service.HealthCheck(context.TODO())
 
 			if serviceError != nil {

@@ -1,4 +1,4 @@
-package controllers_test
+package controllers
 
 import (
 	"bytes"
@@ -12,17 +12,14 @@ import (
 
 	"github.com/golang/mock/gomock"
 
-	"github.com/dhyaniarun1993/foody-common/authentication"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/dhyaniarun1993/foody-common/errors"
-	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/dhyaniarun1993/foody-catalog-service/constants"
-	"github.com/dhyaniarun1993/foody-catalog-service/controllers"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/dto"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
 	services "github.com/dhyaniarun1993/foody-catalog-service/services/mocks"
+	"github.com/dhyaniarun1993/foody-common/errors"
+	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/gorilla/schema"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/go-playground/validator.v9"
@@ -207,11 +204,6 @@ func TestCreateRestaurant(t *testing.T) {
 				t.Fatalf("Unable to create request: %v", err)
 			}
 
-			ctx := context.WithValue(context.TODO(), authentication.UserIDKey, testData.request.UserID)
-			ctx = context.WithValue(ctx, authentication.UserRoleKey, testData.request.UserRole)
-			ctx = context.WithValue(ctx, authentication.AppIDKey, testData.request.AppID)
-			req = req.WithContext(ctx)
-
 			recorder := httptest.NewRecorder()
 			validate := validator.New()
 			schemaDecoder := schema.NewDecoder()
@@ -221,12 +213,12 @@ func TestCreateRestaurant(t *testing.T) {
 			mockRestaurantService := services.NewMockRestaurantService(ctrl)
 
 			if testData.willServiceBeCalled {
-				mockRestaurantService.EXPECT().Create(ctx, testData.request).Return(testData.serviceResponse, testData.serviceResponseError)
+				mockRestaurantService.EXPECT().Create(context.TODO(), testData.request).Return(testData.serviceResponse, testData.serviceResponseError)
 			}
 
-			restaurantController := controllers.NewRestaurantController(mockRestaurantService,
-				mockProductService, logger, validate, schemaDecoder)
-			restaurantController.CreateRestaurant(recorder, req)
+			restaurantController := &restaurantController{mockRestaurantService,
+				mockProductService, logger, validate, schemaDecoder}
+			restaurantController.createRestaurant(recorder, req)
 
 			res := recorder.Result()
 			defer res.Body.Close()

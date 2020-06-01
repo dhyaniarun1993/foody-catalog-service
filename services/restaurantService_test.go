@@ -1,4 +1,4 @@
-package services_test
+package services
 
 import (
 	"context"
@@ -19,7 +19,6 @@ import (
 	mockrepositories "github.com/dhyaniarun1993/foody-catalog-service/repositories/mocks"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/dto"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
-	"github.com/dhyaniarun1993/foody-catalog-service/services"
 	"github.com/dhyaniarun1993/foody-common/errors"
 	"github.com/dhyaniarun1993/foody-common/logger"
 )
@@ -237,7 +236,7 @@ func TestRestaurantCreate(t *testing.T) {
 			mockRestaurantRepository := mockrepositories.NewMockRestaurantRepository(ctrl)
 			mockRBAC := mockacl.NewMockRBAC(ctrl)
 
-			restaurantService := services.NewRestaurantService(mockRestaurantRepository,
+			restaurantService := NewRestaurantService(mockRestaurantRepository,
 				logger, mockRBAC)
 			if (testData.request.UserID == testData.request.Body.MerchantID && testData.createOwnPermissionResult) || testData.createAnyPermissionResult {
 				mockRestaurantRepository.EXPECT().Create(context.TODO(), testData.repositoryRequest).Return(testData.repositoryResponse, testData.repositoryResponseError)
@@ -455,7 +454,7 @@ func TestRestaurantGet(t *testing.T) {
 			mockRestaurantRepository := mockrepositories.NewMockRestaurantRepository(ctrl)
 			mockRBAC := mockacl.NewMockRBAC(ctrl)
 
-			restaurantService := services.NewRestaurantService(mockRestaurantRepository,
+			restaurantService := NewRestaurantService(mockRestaurantRepository,
 				logger, mockRBAC)
 
 			mockRestaurantRepository.EXPECT().Get(context.TODO(), testData.request.Param.RestaurantID).Return(testData.repositoryResponse, testData.repositoryResponseError)
@@ -691,7 +690,7 @@ func TestRestaurantDelete(t *testing.T) {
 			mockRestaurantRepository := mockrepositories.NewMockRestaurantRepository(ctrl)
 			mockRBAC := mockacl.NewMockRBAC(ctrl)
 
-			restaurantService := services.NewRestaurantService(mockRestaurantRepository,
+			restaurantService := NewRestaurantService(mockRestaurantRepository,
 				logger, mockRBAC)
 
 			mockRestaurantRepository.EXPECT().Get(context.TODO(), testData.request.Param.RestaurantID).Return(testData.repositoryGetResponse, testData.repositoryGetResponseError)
@@ -948,7 +947,7 @@ func TestGetAllRestaurants(t *testing.T) {
 			mockRestaurantRepository := mockrepositories.NewMockRestaurantRepository(ctrl)
 			mockRBAC := mockacl.NewMockRBAC(ctrl)
 
-			restaurantService := services.NewRestaurantService(mockRestaurantRepository,
+			restaurantService := NewRestaurantService(mockRestaurantRepository,
 				logger, mockRBAC)
 
 			ctx, cancel := context.WithCancel(context.TODO())

@@ -6,8 +6,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/dhyaniarun1993/foody-catalog-service/services"
+	"github.com/dhyaniarun1993/foody-common/logger"
 )
 
 type healthController struct {
@@ -25,10 +25,10 @@ func NewHealthController(healthService services.HealthService,
 }
 
 func (controller *healthController) LoadRoutes(router *mux.Router) {
-	router.HandleFunc("/health", controller.HealthCheck).Methods("GET")
+	router.HandleFunc("/health", controller.healthCheck).Methods("GET")
 }
 
-func (controller *healthController) HealthCheck(w http.ResponseWriter, r *http.Request) {
+func (controller *healthController) healthCheck(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	serviceError := controller.healthService.HealthCheck(ctx)
 	if serviceError != nil {

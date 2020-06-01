@@ -1,4 +1,4 @@
-package services_test
+package services
 
 import (
 	"context"
@@ -17,7 +17,6 @@ import (
 	mockrepositories "github.com/dhyaniarun1993/foody-catalog-service/repositories/mocks"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/dto"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
-	"github.com/dhyaniarun1993/foody-catalog-service/services"
 	mockservices "github.com/dhyaniarun1993/foody-catalog-service/services/mocks"
 	"github.com/dhyaniarun1993/foody-common/errors"
 	"github.com/dhyaniarun1993/foody-common/logger"
@@ -298,7 +297,7 @@ func TestProductCreate(t *testing.T) {
 			mockRestaurantService := mockservices.NewMockRestaurantService(ctrl)
 			mockRBAC := mockacl.NewMockRBAC(ctrl)
 
-			service := services.NewProductService(mockProductRepository, mockRestaurantService,
+			service := NewProductService(mockProductRepository, mockRestaurantService,
 				logger, mockRBAC)
 
 			getRestaurantRequest := dto.GetRestaurantRequest{
@@ -621,7 +620,7 @@ func TestProductGet(t *testing.T) {
 		mockRestaurantService := mockservices.NewMockRestaurantService(ctrl)
 		mockRBAC := mockacl.NewMockRBAC(ctrl)
 
-		service := services.NewProductService(mockProductRepository, mockRestaurantService,
+		service := NewProductService(mockProductRepository, mockRestaurantService,
 			logger, mockRBAC)
 
 		getRestaurantRequest := dto.GetRestaurantRequest{
@@ -838,7 +837,7 @@ func TestProductDelete(t *testing.T) {
 		mockRestaurantService := mockservices.NewMockRestaurantService(ctrl)
 		mockRBAC := mockacl.NewMockRBAC(ctrl)
 
-		service := services.NewProductService(mockProductRepository, mockRestaurantService,
+		service := NewProductService(mockProductRepository, mockRestaurantService,
 			logger, mockRBAC)
 
 		getRestaurantRequest := dto.GetRestaurantRequest{

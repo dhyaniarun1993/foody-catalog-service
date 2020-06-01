@@ -3,9 +3,9 @@ package repositories
 import (
 	"context"
 
-	"github.com/dhyaniarun1993/foody-common/errors"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/dto"
 	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
+	"github.com/dhyaniarun1993/foody-common/errors"
 )
 
 // HealthRepository provides interface for Health repositories
