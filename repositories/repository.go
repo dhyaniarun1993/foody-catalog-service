@@ -3,8 +3,8 @@ package repositories
 import (
 	"context"
 
-	"github.com/dhyaniarun1993/foody-catalog-service/schemas/dto"
-	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
+	"github.com/dhyaniarun1993/foody-catalog-service/product"
+	"github.com/dhyaniarun1993/foody-catalog-service/restaurant"
 	"github.com/dhyaniarun1993/foody-common/errors"
 )
 
@@ -15,20 +15,18 @@ type HealthRepository interface {
 
 // RestaurantRepository provides interface for Restaurant repository
 type RestaurantRepository interface {
-	Create(context.Context, models.Restaurant) (models.Restaurant, errors.AppError)
-	Get(context.Context, string) (models.Restaurant, errors.AppError)
-	Delete(context.Context, string) errors.AppError
-	GetAllRestaurants(context.Context, dto.GetAllRestaurantsRequestQuery,
-		int64) ([]models.Restaurant, errors.AppError)
-	GetAllRestaurantsTotalCount(context.Context, dto.GetAllRestaurantsRequestQuery,
+	Create(ctx context.Context, restaurant restaurant.Restaurant) (restaurant.Restaurant, errors.AppError)
+	GetByID(ctx context.Context, restaurantID string) (restaurant.Restaurant, errors.AppError)
+	DeleteByID(ctx context.Context, restaurantID string) errors.AppError
+	GetAllRestaurants(context.Context, restaurant.GetAllRestaurantsRequest,
+		int64) ([]restaurant.Restaurant, errors.AppError)
+	GetAllRestaurantsTotalCount(context.Context, restaurant.GetAllRestaurantsRequest,
 		int64) (int64, errors.AppError)
 }
 
 // ProductRepository provides interface for Product repository
 type ProductRepository interface {
-	Create(context.Context, models.Product) (models.Product, errors.AppError)
-	Get(context.Context, string, string) (models.Product, errors.AppError)
-	Delete(context.Context, string, string) errors.AppError
-	GetProductsByRestaurantID(context.Context, string, dto.GetAllProductsRequestQuery) ([]models.Product, errors.AppError)
-	GetProductsByRestaurantTotalCount(context.Context, string, dto.GetAllProductsRequestQuery) (int64, errors.AppError)
+	Create(ctx context.Context, product product.Product) (product.Product, errors.AppError)
+	GetByID(ctx context.Context, productID string) (product.Product, errors.AppError)
+	DeleteByID(ctx context.Context, productID string) errors.AppError
 }

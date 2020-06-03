@@ -7,19 +7,10 @@ var (
 	roleMerchant = gorbac.NewStdRole("merchant")
 	roleCustomer = gorbac.NewStdRole("customer")
 
-	PermissionCreateRestaurantAny = gorbac.NewStdPermission("createRestaurant:any")
-	PermissionCreateRestaurantOwn = gorbac.NewStdPermission("createRestaurant:own")
-	PermissionGetRestaurantAny    = gorbac.NewStdPermission("getRestaurant:any")
-	PermissionGetRestaurantOwn    = gorbac.NewStdPermission("getRestaurant:own")
-	PermissionDeleteRestaurantAny = gorbac.NewStdPermission("deleteRestaurant:any")
-	PermissionDeleteRestaurantOwn = gorbac.NewStdPermission("deleteRestaurant:own")
-
-	PermissionCreateProductAny = gorbac.NewStdPermission("createProduct:any")
-	PermissionCreateProductOwn = gorbac.NewStdPermission("createProduct:own")
-	PermissionGetProductAny    = gorbac.NewStdPermission("getProduct:any")
-	PermissionGetProductOwn    = gorbac.NewStdPermission("getProduct:own")
-	PermissionDeleteProductAny = gorbac.NewStdPermission("deleteProduct:any")
-	PermissionDeleteProductOwn = gorbac.NewStdPermission("deleteProduct:own")
+	PermissionCatalogWriteAny = gorbac.NewStdPermission("catalog:write:any")
+	PermissionCatalogWriteOwn = gorbac.NewStdPermission("catalog:write:own")
+	PermissionCatalogReadAny  = gorbac.NewStdPermission("catalog:read:any")
+	PermissionCatalogReadOwn  = gorbac.NewStdPermission("catalog:read:any")
 )
 
 // RBAC provides interface Role bases access control list
@@ -36,16 +27,11 @@ func New() RBAC {
 	rbacObj := gorbac.New()
 
 	// merchant permissions
-	roleMerchant.Assign(PermissionCreateRestaurantOwn)
-	roleMerchant.Assign(PermissionGetRestaurantOwn)
-	roleMerchant.Assign(PermissionDeleteRestaurantOwn)
-	roleMerchant.Assign(PermissionCreateProductOwn)
-	roleMerchant.Assign(PermissionGetProductOwn)
-	roleMerchant.Assign(PermissionDeleteProductOwn)
+	roleMerchant.Assign(PermissionCatalogWriteOwn)
+	roleMerchant.Assign(PermissionCatalogReadOwn)
 
 	// customer permissions
-	roleCustomer.Assign(PermissionGetRestaurantAny)
-	roleCustomer.Assign(PermissionGetProductAny)
+	roleCustomer.Assign(PermissionCatalogReadAny)
 
 	rbacObj.Add(roleMerchant)
 	rbacObj.Add(roleCustomer)

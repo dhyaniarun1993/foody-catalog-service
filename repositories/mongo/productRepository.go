@@ -7,18 +7,24 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	mongoOptions "go.mongodb.org/mongo-driver/mongo/options"
+	mongoDriver "go.mongodb.org/mongo-driver/mongo"
 
+	"github.com/dhyaniarun1993/foody-catalog-service/product"
 	"github.com/dhyaniarun1993/foody-catalog-service/repositories"
-	"github.com/dhyaniarun1993/foody-catalog-service/schemas/dto"
-	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
+	"github.com/dhyaniarun1993/foody-catalog-service/repositories/mongo/dao"
 	"github.com/dhyaniarun1993/foody-common/datastore/mongo"
 	"github.com/dhyaniarun1993/foody-common/errors"
 )
 
 const (
 	productCollection = "product"
+	variantCollection = "variant"
 )
+
+type productDao struct {
+	product.Product
+	RestaurantID primitive.ObjectID `bson:"restaurant_id" json:"restaurant_id"`
+}
 
 type productRepository struct {
 	*mongo.Client
@@ -30,51 +36,95 @@ func NewProductRepository(mongoClient *mongo.Client, database string) repositori
 	return &productRepository{mongoClient, database}
 }
 
-func (db *productRepository) Create(ctx context.Context,
-	product models.Product) (models.Product, errors.AppError) {
+func (db *productRepository) Create(ctx context.Context, product product.Product) (product.Product, errors.AppError) {
 
 	product.CreatedAt = time.Now()
 	product.UpdatedAt = time.Now()
-	insertCtx, insertCancel := context.WithTimeout(ctx, 1*time.Second)
-	defer insertCancel()
 
-	collection := db.Database(db.database).Collection(productCollection)
-
-	insertResult, insertError := collection.InsertOne(insertCtx, product)
-	if insertError != nil {
-		return product, errors.NewAppError("Unable to insert restaurant to DB",
-			http.StatusServiceUnavailable, insertError)
+	productDao, daoErr := dao.GetProductDao(product)
+	if daoErr != nil {
+		return product, daoErr
 	}
 
-	id, _ := insertResult.InsertedID.(primitive.ObjectID)
-	product.ID = id
+	insertProductCtx, insertProductCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer insertProductCancel()
+	// Todo: insert product and variant in transaction
+	// insert product data in datastore
+	productCollection := db.Database(db.database).Collection(productCollection)
+	insertProductResult, insertProductError := productCollection.InsertOne(insertProductCtx, productDao)
+	if insertProductError != nil {
+		return product, errors.NewAppError("Unable to insert product to DB",
+			http.StatusServiceUnavailable, insertProductError)
+	}
+
+	// extract id  of the product inserted
+	productObjectID, _ := insertProductResult.InsertedID.(primitive.ObjectID)
+	product.ID = productObjectID.Hex()
+
+	// create variant as list of interface to support InsertMany
+	variants := make([]interface{}, len(product.Variants))
+	for i := range product.Variants {
+		// Add product id to product variant data
+		product.Variants[i].ProductID = productObjectID.Hex()
+		// convert product variant model to product variant dao
+		variantDao, err := dao.GetVariantDao(product.Variants[i])
+		if err != nil {
+			return product, err
+		}
+		// append the updated dao variant object to the variant interface list
+		variants[i] = variantDao
+	}
+
+	insertVariantCtx, insertVariantCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer insertVariantCancel()
+	// insert product variant data in datastore
+	variantCollection := db.Database(db.database).Collection(variantCollection)
+	insertVariantResult, insertVariantError := variantCollection.InsertMany(insertVariantCtx, variants)
+	if insertVariantError != nil {
+		return product, errors.NewAppError("Unable to insert variant to DB",
+			http.StatusServiceUnavailable, insertVariantError)
+	}
+
+	// extract product variant id and update it in the product data
+	for i, variantInsertID := range insertVariantResult.InsertedIDs {
+		variantObjectID, _ := variantInsertID.(primitive.ObjectID)
+		product.Variants[i].ID = variantObjectID.Hex()
+	}
+
 	return product, nil
 }
 
-func (db *productRepository) Get(ctx context.Context, productID string,
-	restaurantID string) (models.Product, errors.AppError) {
+func (db *productRepository) GetByID(ctx context.Context, productID string) (product.Product, errors.AppError) {
 
-	var product models.Product
+	var productObj product.Product
 	findCtx, findCancel := context.WithTimeout(ctx, 1*time.Second)
 	defer findCancel()
 
 	productObjectID, _ := primitive.ObjectIDFromHex(productID)
-	restaurantObjectID, _ := primitive.ObjectIDFromHex(restaurantID)
-	filter := bson.D{
+	match := bson.D{
 		{
-			Key:   "_id",
-			Value: productObjectID,
+			Key: "$match",
+			Value: bson.D{
+				{Key: "_id", Value: productObjectID},
+			},
 		},
+	}
+	lookupVariants := bson.D{
 		{
-			Key:   "restaurant_id",
-			Value: restaurantObjectID,
+			Key: "$lookup",
+			Value: bson.D{
+				{Key: "localField", Value: "_id"},
+				{Key: "from", Value: "variant"},
+				{Key: "foreignField", Value: "product_id"},
+				{Key: "as", Value: "variants"},
+			},
 		},
 	}
 
 	collection := db.Database(db.database).Collection(productCollection)
-	cursor, findError := collection.Find(findCtx, filter)
+	cursor, findError := collection.Aggregate(findCtx, mongoDriver.Pipeline{match, lookupVariants})
 	if findError != nil {
-		return models.Product{}, errors.NewAppError("Unable to get data from DB",
+		return product.Product{}, errors.NewAppError("Unable to get data from DB",
 			http.StatusInternalServerError, findError)
 	}
 
@@ -82,31 +132,25 @@ func (db *productRepository) Get(ctx context.Context, productID string,
 	defer cursorCancel()
 
 	if cursor.Next(cursorCtx) {
-		decodeError := cursor.Decode(&product)
+		decodeError := cursor.Decode(&productObj)
 		if decodeError != nil {
-			return models.Product{}, errors.NewAppError("Unable to decode categories",
+			return product.Product{}, errors.NewAppError("Unable to decode categories",
 				http.StatusInternalServerError, decodeError)
 		}
 	}
-	return product, nil
+	return productObj, nil
 }
 
-func (db *productRepository) Delete(ctx context.Context,
-	productID string, restaurantID string) errors.AppError {
+func (db *productRepository) DeleteByID(ctx context.Context, productID string) errors.AppError {
 
 	deleteCtx, deleteCancel := context.WithTimeout(ctx, 1*time.Second)
 	defer deleteCancel()
 
 	productObjectID, _ := primitive.ObjectIDFromHex(productID)
-	restaurantObjectID, _ := primitive.ObjectIDFromHex(restaurantID)
 	filter := bson.D{
 		{
 			Key:   "_id",
 			Value: productObjectID,
-		},
-		{
-			Key:   "restaurant_id",
-			Value: restaurantObjectID,
 		},
 	}
 
@@ -118,109 +162,4 @@ func (db *productRepository) Delete(ctx context.Context,
 	}
 
 	return nil
-}
-
-func (db *productRepository) GetProductsByRestaurantID(ctx context.Context, restaurantID string,
-	query dto.GetAllProductsRequestQuery) ([]models.Product, errors.AppError) {
-
-	products := []models.Product{}
-	offset := (query.PageNumber - 1) * query.PageSize
-
-	findCtx, findCancel := context.WithTimeout(ctx, 1*time.Second)
-	defer findCancel()
-
-	findOptions := &mongoOptions.FindOptions{
-		Skip:  &offset,
-		Limit: &query.PageSize,
-	}
-
-	restaurantObjectID, _ := primitive.ObjectIDFromHex(restaurantID)
-	filter := bson.D{
-		{
-			Key:   "restaurant_id",
-			Value: restaurantObjectID,
-		},
-	}
-
-	idFilterValue := bson.A{}
-	for _, id := range query.ID {
-		objectID, _ := primitive.ObjectIDFromHex(id)
-		idFilterValue = append(idFilterValue, objectID)
-	}
-
-	if len(idFilterValue) > 0 {
-		idFilter := bson.E{
-			Key: "_id",
-			Value: bson.D{
-				{
-					Key:   "$in",
-					Value: idFilterValue,
-				},
-			},
-		}
-		filter = append(filter, idFilter)
-	}
-
-	collection := db.Database(db.database).Collection(productCollection)
-
-	cursor, findError := collection.Find(findCtx, filter, findOptions)
-	if findError != nil {
-		return products, errors.NewAppError("Unable to get data from DB", http.StatusInternalServerError, findError)
-	}
-
-	cursorCtx, cursorCancel := context.WithCancel(ctx)
-	defer cursorCancel()
-	for cursor.Next(cursorCtx) {
-		var product models.Product
-		decodeError := cursor.Decode(&product)
-		if decodeError != nil {
-			return products, errors.NewAppError("Unable to decode categories", http.StatusInternalServerError, decodeError)
-		}
-		products = append(products, product)
-	}
-	return products, nil
-}
-
-func (db productRepository) GetProductsByRestaurantTotalCount(ctx context.Context, restaurantID string,
-	query dto.GetAllProductsRequestQuery) (int64, errors.AppError) {
-
-	countCtx, countCancel := context.WithTimeout(ctx, 1*time.Second)
-	defer countCancel()
-
-	restaurantObjectID, _ := primitive.ObjectIDFromHex(restaurantID)
-	filter := bson.D{
-		{
-			Key:   "restaurant_id",
-			Value: restaurantObjectID,
-		},
-	}
-
-	idFilterValue := bson.A{}
-	for _, id := range query.ID {
-		objectID, _ := primitive.ObjectIDFromHex(id)
-		idFilterValue = append(idFilterValue, objectID)
-	}
-
-	if len(idFilterValue) > 0 {
-		idFilter := bson.E{
-			Key: "_id",
-			Value: bson.D{
-				{
-					Key:   "$in",
-					Value: idFilterValue,
-				},
-			},
-		}
-		filter = append(filter, idFilter)
-	}
-
-	collection := db.Database(db.database).Collection(productCollection)
-
-	totalCount, countError := collection.CountDocuments(countCtx, filter)
-	if countError != nil {
-		return totalCount, errors.NewAppError("Unable to get data from DB",
-			http.StatusInternalServerError, countError)
-	}
-
-	return totalCount, nil
 }

@@ -1,0 +1,50 @@
+package http
+
+import (
+	"time"
+
+	"github.com/dhyaniarun1993/foody-catalog-service/restaurant"
+	"github.com/dhyaniarun1993/foody-common/authentication"
+	"github.com/dhyaniarun1993/foody-common/logger"
+	"github.com/dhyaniarun1993/foody-common/middlewares"
+	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
+	"gopkg.in/go-playground/validator.v9"
+)
+
+type restaurantHandler struct {
+	restaurantInteractor restaurant.Interactor
+	logger               *logger.Logger
+	validate             *validator.Validate
+	schemaDecoder        *schema.Decoder
+}
+
+// NewRestaurantHandler initialize restaurant endpoint
+func NewRestaurantHandler(restaurantInteractor restaurant.Interactor, logger *logger.Logger,
+	validate *validator.Validate, schemaDecoder *schema.Decoder) Handler {
+
+	return &restaurantHandler{
+		restaurantInteractor: restaurantInteractor,
+		logger:               logger,
+		validate:             validate,
+		schemaDecoder:        schemaDecoder,
+	}
+}
+
+func (handler *restaurantHandler) LoadRoutes(router *mux.Router) {
+	router.Handle("/v1/catalog/restaurants",
+		middlewares.ChainHandlerFuncMiddlewares(handler.createRestaurant,
+			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("POST")
+
+	router.Handle("/v1/catalog/restaurants/{restaurantId}",
+		middlewares.ChainHandlerFuncMiddlewares(handler.getRestaurantByID,
+			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("GET")
+
+	router.Handle("/v1/catalog/restaurants/{restaurantId}",
+		middlewares.ChainHandlerFuncMiddlewares(handler.deleteRestaurantByID,
+			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("DELETE")
+
+	router.Handle("/v1/catalog/restaurants",
+		middlewares.ChainHandlerFuncMiddlewares(handler.getAllRestaurants,
+			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("GET")
+}

@@ -10,8 +10,7 @@ import (
 	mongoOptions "go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/dhyaniarun1993/foody-catalog-service/repositories"
-	"github.com/dhyaniarun1993/foody-catalog-service/schemas/dto"
-	"github.com/dhyaniarun1993/foody-catalog-service/schemas/models"
+	"github.com/dhyaniarun1993/foody-catalog-service/restaurant"
 	"github.com/dhyaniarun1993/foody-common/datastore/mongo"
 	"github.com/dhyaniarun1993/foody-common/errors"
 )
@@ -31,7 +30,7 @@ func NewRestaurantRepository(mongoClient *mongo.Client, database string) reposit
 }
 
 func (db *restaurantRepository) Create(ctx context.Context,
-	restaurant models.Restaurant) (models.Restaurant, errors.AppError) {
+	restaurant restaurant.Restaurant) (restaurant.Restaurant, errors.AppError) {
 
 	restaurant.CreatedAt = time.Now()
 	restaurant.UpdatedAt = time.Now()
@@ -45,18 +44,17 @@ func (db *restaurantRepository) Create(ctx context.Context,
 	if insertError != nil {
 		err := errors.NewAppError("Unable to insert restaurant to DB",
 			http.StatusServiceUnavailable, insertError)
-		return models.Restaurant{}, err
+		return restaurant, err
 	}
 
 	id, _ := insertResult.InsertedID.(primitive.ObjectID)
-	restaurant.ID = id
+	restaurant.ID = id.Hex()
 	return restaurant, nil
 }
 
-func (db *restaurantRepository) Get(ctx context.Context,
-	restaurantID string) (models.Restaurant, errors.AppError) {
+func (db *restaurantRepository) GetByID(ctx context.Context, restaurantID string) (restaurant.Restaurant, errors.AppError) {
 
-	var restaurant models.Restaurant
+	var restaurantObj restaurant.Restaurant
 	findCtx, findCancel := context.WithTimeout(ctx, 1*time.Second)
 	defer findCancel()
 
@@ -72,7 +70,7 @@ func (db *restaurantRepository) Get(ctx context.Context,
 
 	cursor, findError := collection.Find(findCtx, filter)
 	if findError != nil {
-		return restaurant, errors.NewAppError("Unable to get data from DB",
+		return restaurant.Restaurant{}, errors.NewAppError("Unable to get data from DB",
 			http.StatusInternalServerError, findError)
 	}
 
@@ -80,15 +78,15 @@ func (db *restaurantRepository) Get(ctx context.Context,
 	defer cursorCancel()
 
 	if cursor.Next(cursorCtx) {
-		decodeError := cursor.Decode(&restaurant)
+		decodeError := cursor.Decode(&restaurantObj)
 		if decodeError != nil {
-			return models.Restaurant{}, errors.NewAppError("Unable to decode categories", http.StatusInternalServerError, decodeError)
+			return restaurant.Restaurant{}, errors.NewAppError("Unable to decode categories", http.StatusInternalServerError, decodeError)
 		}
 	}
-	return restaurant, nil
+	return restaurantObj, nil
 }
 
-func (db *restaurantRepository) Delete(ctx context.Context,
+func (db *restaurantRepository) DeleteByID(ctx context.Context,
 	restaurantID string) errors.AppError {
 
 	deleteCtx, deleteCancel := context.WithTimeout(ctx, 1*time.Second)
@@ -111,10 +109,10 @@ func (db *restaurantRepository) Delete(ctx context.Context,
 	return nil
 }
 
-func (db *restaurantRepository) GetAllRestaurants(ctx context.Context,
-	query dto.GetAllRestaurantsRequestQuery, maxDistance int64) ([]models.Restaurant, errors.AppError) {
+func (db *restaurantRepository) GetAllRestaurants(ctx context.Context, query restaurant.GetAllRestaurantsRequest,
+	maxDistance int64) ([]restaurant.Restaurant, errors.AppError) {
 
-	restaurants := []models.Restaurant{}
+	restaurants := []restaurant.Restaurant{}
 	offset := (query.PageNumber - 1) * query.PageSize
 	findCtx, findCancel := context.WithTimeout(ctx, 1*time.Second)
 	defer findCancel()
@@ -143,33 +141,6 @@ func (db *restaurantRepository) GetAllRestaurants(ctx context.Context,
 		},
 	}
 
-	idFilterValue := bson.A{}
-	for _, id := range query.ID {
-		objectID, _ := primitive.ObjectIDFromHex(id)
-		idFilterValue = append(idFilterValue, objectID)
-	}
-
-	if len(idFilterValue) > 0 {
-		idFilter := bson.E{
-			Key: "_id",
-			Value: bson.D{
-				{
-					Key:   "$in",
-					Value: idFilterValue,
-				},
-			},
-		}
-		filter = append(filter, idFilter)
-	}
-
-	if query.MerchantID != "" {
-		merchantFilter := bson.E{
-			Key:   "merchant_id",
-			Value: query.MerchantID,
-		}
-		filter = append(filter, merchantFilter)
-	}
-
 	collection := db.Database(db.database).Collection(restaurantCollection)
 
 	cursor, findError := collection.Find(findCtx, filter, findOptions)
@@ -180,18 +151,18 @@ func (db *restaurantRepository) GetAllRestaurants(ctx context.Context,
 	cursorCtx, cursorCancel := context.WithCancel(ctx)
 	defer cursorCancel()
 	for cursor.Next(cursorCtx) {
-		var restaurant models.Restaurant
-		decodeError := cursor.Decode(&restaurant)
+		var restaurantObj restaurant.Restaurant
+		decodeError := cursor.Decode(&restaurantObj)
 		if decodeError != nil {
 			return restaurants, errors.NewAppError("Unable to decode categories", http.StatusInternalServerError, decodeError)
 		}
-		restaurants = append(restaurants, restaurant)
+		restaurants = append(restaurants, restaurantObj)
 	}
 	return restaurants, nil
 }
 
 func (db *restaurantRepository) GetAllRestaurantsTotalCount(ctx context.Context,
-	query dto.GetAllRestaurantsRequestQuery, maxDistance int64) (int64, errors.AppError) {
+	query restaurant.GetAllRestaurantsRequest, maxDistance int64) (int64, errors.AppError) {
 
 	countCtx, countCancel := context.WithTimeout(ctx, 1*time.Second)
 	defer countCancel()
@@ -213,25 +184,6 @@ func (db *restaurantRepository) GetAllRestaurantsTotalCount(ctx context.Context,
 				},
 			},
 		},
-	}
-
-	idFilterValue := bson.A{}
-	for _, id := range query.ID {
-		objectID, _ := primitive.ObjectIDFromHex(id)
-		idFilterValue = append(idFilterValue, objectID)
-	}
-
-	if len(idFilterValue) > 0 {
-		idFilter := bson.E{
-			Key: "_id",
-			Value: bson.D{
-				{
-					Key:   "$in",
-					Value: idFilterValue,
-				},
-			},
-		}
-		filter = append(filter, idFilter)
 	}
 
 	collection := db.Database(db.database).Collection(restaurantCollection)

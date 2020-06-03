@@ -11,9 +11,11 @@ import (
 
 	"github.com/dhyaniarun1993/foody-catalog-service/acl"
 	"github.com/dhyaniarun1993/foody-catalog-service/cmd/catalog-server/config"
-	"github.com/dhyaniarun1993/foody-catalog-service/controllers"
+	httpHandler "github.com/dhyaniarun1993/foody-catalog-service/handlers/http"
+	"github.com/dhyaniarun1993/foody-catalog-service/health"
+	"github.com/dhyaniarun1993/foody-catalog-service/product"
 	repositories "github.com/dhyaniarun1993/foody-catalog-service/repositories/mongo"
-	"github.com/dhyaniarun1993/foody-catalog-service/services"
+	"github.com/dhyaniarun1993/foody-catalog-service/restaurant"
 	"github.com/dhyaniarun1993/foody-common/datastore/mongo"
 	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/dhyaniarun1993/foody-common/tracer"
@@ -34,21 +36,24 @@ func main() {
 	restaurantRepository := repositories.NewRestaurantRepository(mongoClient, config.Mongo.Database)
 	productRepository := repositories.NewProductRepository(mongoClient, config.Mongo.Database)
 
-	healthService := services.NewHealthService(healthRepository, logger)
-	restaurantService := services.NewRestaurantService(restaurantRepository, logger, rbac)
-	productService := services.NewProductService(productRepository, restaurantService, logger, rbac)
+	healthInteractor := health.NewHealthInteractor(healthRepository, logger)
+	restaurantInteractor := restaurant.NewRestaurantInteractor(restaurantRepository, logger, rbac, validate)
+	productInteractor := product.NewProductInteractor(productRepository, restaurantInteractor, logger, rbac, validate)
 
 	router := mux.NewRouter()
-	ignoredURLs := []string{"/health1"}
+	ignoredURLs := []string{"/health"}
 	ignoredMethods := []string{"OPTION"}
 
 	router.Use(tracer.TraceRequest(t, ignoredURLs, ignoredMethods))
-	healthController := controllers.NewHealthController(healthService, logger)
-	restaurantController := controllers.NewRestaurantController(restaurantService, productService,
+	healthHandler := httpHandler.NewHealthHandler(healthInteractor, logger)
+	restaurantHandler := httpHandler.NewRestaurantHandler(restaurantInteractor,
 		logger, validate, schemaDecoder)
+	productHandler := httpHandler.NewProductHandler(productInteractor, logger,
+		validate, schemaDecoder)
 
-	healthController.LoadRoutes(router)
-	restaurantController.LoadRoutes(router)
+	healthHandler.LoadRoutes(router)
+	restaurantHandler.LoadRoutes(router)
+	productHandler.LoadRoutes(router)
 	serverAddress := ":" + fmt.Sprint(config.Port)
 	srv := &http.Server{
 		Handler:      router,
