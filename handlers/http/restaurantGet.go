@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dhyaniarun1993/foody-catalog-service/restaurant"
+	restaurantUsecase "github.com/dhyaniarun1993/foody-catalog-service/restaurant/usecase"
 	"github.com/dhyaniarun1993/foody-common/authentication"
 	"github.com/gorilla/mux"
 )
@@ -32,7 +32,7 @@ func (handler *restaurantHandler) getRestaurantByID(w http.ResponseWriter, r *ht
 }
 
 func (handler *restaurantHandler) getAllRestaurants(w http.ResponseWriter, r *http.Request) {
-	var request restaurant.GetAllRestaurantsRequest
+	var request restaurantUsecase.GetAllRestaurantsRequest
 	ctx := r.Context()
 	auth, _ := authentication.GetAuthFromContext(ctx)
 	logger := handler.logger.WithContext(ctx)

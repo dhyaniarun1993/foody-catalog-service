@@ -1,9 +1,8 @@
-package restaurant
+package usecase
 
 import (
 	"context"
 	"net/http"
-	"reflect"
 
 	"github.com/dhyaniarun1993/foody-catalog-service/acl"
 	"github.com/dhyaniarun1993/foody-common/authentication"
@@ -13,16 +12,12 @@ import (
 func (interactor *restaurantInteractor) DeleteByID(ctx context.Context, auth authentication.Auth,
 	restaurantID string) errors.AppError {
 
-	restaurant, getError := interactor.restaurantRepository.GetByID(ctx, restaurantID)
+	restaurantObj, getError := interactor.GetByID(ctx, auth, restaurantID)
 	if getError != nil {
 		return getError
 	}
 
-	if reflect.DeepEqual(restaurant, Restaurant{}) {
-		return errors.NewAppError("Resource not found", http.StatusNotFound, nil)
-	}
-
-	if (auth.GetUserID() == restaurant.MerchantID &&
+	if (auth.GetUserID() == restaurantObj.MerchantID &&
 		interactor.rbac.Can(auth.GetUserRole(), acl.PermissionCatalogWriteOwn)) ||
 		interactor.rbac.Can(auth.GetUserRole(), acl.PermissionCatalogWriteAny) {
 

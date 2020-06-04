@@ -3,30 +3,27 @@ package http
 import (
 	"time"
 
-	"github.com/dhyaniarun1993/foody-catalog-service/product"
+	productUsecase "github.com/dhyaniarun1993/foody-catalog-service/product/usecase"
 	"github.com/dhyaniarun1993/foody-common/authentication"
 	"github.com/dhyaniarun1993/foody-common/logger"
 	"github.com/dhyaniarun1993/foody-common/middlewares"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type productHandler struct {
-	productInteractor product.Interactor
+	productInteractor productUsecase.Interactor
 	logger            *logger.Logger
-	validate          *validator.Validate
 	schemaDecoder     *schema.Decoder
 }
 
 // NewProductHandler initialize product endpoint
-func NewProductHandler(productInteractor product.Interactor, logger *logger.Logger,
-	validate *validator.Validate, schemaDecoder *schema.Decoder) Handler {
+func NewProductHandler(productInteractor productUsecase.Interactor, logger *logger.Logger,
+	schemaDecoder *schema.Decoder) Handler {
 
 	return &productHandler{
 		productInteractor: productInteractor,
 		logger:            logger,
-		validate:          validate,
 		schemaDecoder:     schemaDecoder,
 	}
 }

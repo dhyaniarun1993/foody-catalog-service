@@ -11,6 +11,7 @@ import (
 
 	"github.com/dhyaniarun1993/foody-catalog-service/repositories"
 	"github.com/dhyaniarun1993/foody-catalog-service/restaurant"
+	restaurantUsecase "github.com/dhyaniarun1993/foody-catalog-service/restaurant/usecase"
 	"github.com/dhyaniarun1993/foody-common/datastore/mongo"
 	"github.com/dhyaniarun1993/foody-common/errors"
 )
@@ -42,7 +43,7 @@ func (db *restaurantRepository) Create(ctx context.Context,
 
 	insertResult, insertError := collection.InsertOne(insertCtx, restaurant)
 	if insertError != nil {
-		err := errors.NewAppError("Unable to insert restaurant to DB",
+		err := errors.NewAppError("Something went wrong",
 			http.StatusServiceUnavailable, insertError)
 		return restaurant, err
 	}
@@ -70,7 +71,7 @@ func (db *restaurantRepository) GetByID(ctx context.Context, restaurantID string
 
 	cursor, findError := collection.Find(findCtx, filter)
 	if findError != nil {
-		return restaurant.Restaurant{}, errors.NewAppError("Unable to get data from DB",
+		return restaurant.Restaurant{}, errors.NewAppError("Something went wrong",
 			http.StatusInternalServerError, findError)
 	}
 
@@ -80,7 +81,8 @@ func (db *restaurantRepository) GetByID(ctx context.Context, restaurantID string
 	if cursor.Next(cursorCtx) {
 		decodeError := cursor.Decode(&restaurantObj)
 		if decodeError != nil {
-			return restaurant.Restaurant{}, errors.NewAppError("Unable to decode categories", http.StatusInternalServerError, decodeError)
+			return restaurant.Restaurant{}, errors.NewAppError("Something went wrong",
+				http.StatusInternalServerError, decodeError)
 		}
 	}
 	return restaurantObj, nil
@@ -104,12 +106,13 @@ func (db *restaurantRepository) DeleteByID(ctx context.Context,
 
 	_, deleteErr := collection.DeleteOne(deleteCtx, filter)
 	if deleteErr != nil {
-		return errors.NewAppError("Unable to delete from DB", http.StatusInternalServerError, deleteErr)
+		return errors.NewAppError("Something went wrong", http.StatusInternalServerError, deleteErr)
 	}
 	return nil
 }
 
-func (db *restaurantRepository) GetAllRestaurants(ctx context.Context, query restaurant.GetAllRestaurantsRequest,
+func (db *restaurantRepository) GetAllRestaurants(ctx context.Context,
+	query restaurantUsecase.GetAllRestaurantsRequest,
 	maxDistance int64) ([]restaurant.Restaurant, errors.AppError) {
 
 	restaurants := []restaurant.Restaurant{}
@@ -145,7 +148,7 @@ func (db *restaurantRepository) GetAllRestaurants(ctx context.Context, query res
 
 	cursor, findError := collection.Find(findCtx, filter, findOptions)
 	if findError != nil {
-		return restaurants, errors.NewAppError("Unable to get data from DB", http.StatusInternalServerError, findError)
+		return restaurants, errors.NewAppError("Something went wrong", http.StatusInternalServerError, findError)
 	}
 
 	cursorCtx, cursorCancel := context.WithCancel(ctx)
@@ -154,7 +157,7 @@ func (db *restaurantRepository) GetAllRestaurants(ctx context.Context, query res
 		var restaurantObj restaurant.Restaurant
 		decodeError := cursor.Decode(&restaurantObj)
 		if decodeError != nil {
-			return restaurants, errors.NewAppError("Unable to decode categories", http.StatusInternalServerError, decodeError)
+			return restaurants, errors.NewAppError("Something went wrong", http.StatusInternalServerError, decodeError)
 		}
 		restaurants = append(restaurants, restaurantObj)
 	}
@@ -162,7 +165,7 @@ func (db *restaurantRepository) GetAllRestaurants(ctx context.Context, query res
 }
 
 func (db *restaurantRepository) GetAllRestaurantsTotalCount(ctx context.Context,
-	query restaurant.GetAllRestaurantsRequest, maxDistance int64) (int64, errors.AppError) {
+	query restaurantUsecase.GetAllRestaurantsRequest, maxDistance int64) (int64, errors.AppError) {
 
 	countCtx, countCancel := context.WithTimeout(ctx, 1*time.Second)
 	defer countCancel()
@@ -190,7 +193,7 @@ func (db *restaurantRepository) GetAllRestaurantsTotalCount(ctx context.Context,
 
 	totalCount, findError := collection.CountDocuments(countCtx, filter)
 	if findError != nil {
-		return totalCount, errors.NewAppError("Unable to get data from DB", http.StatusInternalServerError, findError)
+		return totalCount, errors.NewAppError("Something went wrong", http.StatusInternalServerError, findError)
 	}
 
 	return totalCount, nil

@@ -9,15 +9,6 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-// Category provides the model definition for Product Category
-type Category struct {
-	ID        string    `bson:"_id,omitempty" json:"id"`
-	Name      string    `bson:"name" json:"name" validate:"required"`
-	Products  []Product `bson:"-" json:"products,omitempty"`
-	CreatedAt time.Time `bson:"created_at" json:"created_at"`
-	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`
-}
-
 // Price provides the schema definition for Price
 type Price struct {
 	Amount   float64 `bson:"amount" json:"amount" validate:"required"`
@@ -40,6 +31,7 @@ type Variant struct {
 type Product struct {
 	ID           string    `bson:"_id,omitempty" json:"id"`
 	RestaurantID string    `bson:"restaurant_id" json:"restaurant_id" validate:"required"`
+	CategoryID   string    `bson:"category_id" json:"category_id" validate:"required"`
 	Name         string    `bson:"name" json:"name" validate:"required,min=6,max=30"`
 	Description  string    `bson:"description" json:"description" validate:"max=120"`
 	IsVeg        *bool     `bson:"is_veg" json:"is_veg" validate:"required"`

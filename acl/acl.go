@@ -10,7 +10,7 @@ var (
 	PermissionCatalogWriteAny = gorbac.NewStdPermission("catalog:write:any")
 	PermissionCatalogWriteOwn = gorbac.NewStdPermission("catalog:write:own")
 	PermissionCatalogReadAny  = gorbac.NewStdPermission("catalog:read:any")
-	PermissionCatalogReadOwn  = gorbac.NewStdPermission("catalog:read:any")
+	PermissionCatalogReadOwn  = gorbac.NewStdPermission("catalog:read:own")
 )
 
 // RBAC provides interface Role bases access control list

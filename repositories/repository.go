@@ -3,8 +3,10 @@ package repositories
 import (
 	"context"
 
+	"github.com/dhyaniarun1993/foody-catalog-service/category"
 	"github.com/dhyaniarun1993/foody-catalog-service/product"
 	"github.com/dhyaniarun1993/foody-catalog-service/restaurant"
+	restaurantUsecase "github.com/dhyaniarun1993/foody-catalog-service/restaurant/usecase"
 	"github.com/dhyaniarun1993/foody-common/errors"
 )
 
@@ -18,9 +20,9 @@ type RestaurantRepository interface {
 	Create(ctx context.Context, restaurant restaurant.Restaurant) (restaurant.Restaurant, errors.AppError)
 	GetByID(ctx context.Context, restaurantID string) (restaurant.Restaurant, errors.AppError)
 	DeleteByID(ctx context.Context, restaurantID string) errors.AppError
-	GetAllRestaurants(context.Context, restaurant.GetAllRestaurantsRequest,
+	GetAllRestaurants(context.Context, restaurantUsecase.GetAllRestaurantsRequest,
 		int64) ([]restaurant.Restaurant, errors.AppError)
-	GetAllRestaurantsTotalCount(context.Context, restaurant.GetAllRestaurantsRequest,
+	GetAllRestaurantsTotalCount(context.Context, restaurantUsecase.GetAllRestaurantsRequest,
 		int64) (int64, errors.AppError)
 }
 
@@ -29,4 +31,11 @@ type ProductRepository interface {
 	Create(ctx context.Context, product product.Product) (product.Product, errors.AppError)
 	GetByID(ctx context.Context, productID string) (product.Product, errors.AppError)
 	DeleteByID(ctx context.Context, productID string) errors.AppError
+}
+
+// CategoryRepository provides interface for Category repository
+type CategoryRepository interface {
+	Create(ctx context.Context, category category.Category) (category.Category, errors.AppError)
+	GetByID(ctx context.Context, categoryID string) (category.Category, errors.AppError)
+	DeleteByID(ctx context.Context, categoryID string) errors.AppError
 }

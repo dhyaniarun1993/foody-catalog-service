@@ -1,4 +1,4 @@
-package restaurant
+package usecase
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"github.com/dhyaniarun1993/foody-catalog-service/acl"
+	"github.com/dhyaniarun1993/foody-catalog-service/restaurant"
 	"github.com/dhyaniarun1993/foody-common/async"
 	"github.com/dhyaniarun1993/foody-common/authentication"
 	"github.com/dhyaniarun1993/foody-common/errors"
@@ -15,30 +16,30 @@ import (
 )
 
 func (interactor *restaurantInteractor) GetByID(ctx context.Context, auth authentication.Auth,
-	restaurantID string) (Restaurant, errors.AppError) {
+	restaurantID string) (restaurant.Restaurant, errors.AppError) {
 
-	restaurant, repositoryError := interactor.restaurantRepository.GetByID(ctx, restaurantID)
+	restaurantObj, repositoryError := interactor.restaurantRepository.GetByID(ctx, restaurantID)
 	if repositoryError != nil {
-		return restaurant, repositoryError
+		return restaurant.Restaurant{}, repositoryError
 	}
 
-	if reflect.DeepEqual(restaurant, Restaurant{}) {
-		return restaurant, errors.NewAppError("Resource not found", http.StatusNotFound, nil)
+	if reflect.DeepEqual(restaurantObj, restaurant.Restaurant{}) {
+		return restaurant.Restaurant{}, errors.NewAppError("Unable to find restaurant", http.StatusNotFound, nil)
 	}
 
-	if (auth.GetUserID() == restaurant.MerchantID &&
+	if (auth.GetUserID() == restaurantObj.MerchantID &&
 		interactor.rbac.Can(auth.GetUserRole(), acl.PermissionCatalogReadOwn)) ||
 		interactor.rbac.Can(auth.GetUserRole(), acl.PermissionCatalogReadAny) {
-		return restaurant, nil
+		return restaurantObj, nil
 	}
 
-	return Restaurant{}, errors.NewAppError("Forbidden", http.StatusForbidden, nil)
+	return restaurant.Restaurant{}, errors.NewAppError("Forbidden", http.StatusForbidden, nil)
 }
 
 func (interactor *restaurantInteractor) GetAllRestaurants(ctx context.Context, auth authentication.Auth,
 	request GetAllRestaurantsRequest) (GetAllRestaurantsResponse, errors.AppError) {
 
-	var restaurants []Restaurant
+	var restaurants []restaurant.Restaurant
 	var totalCount, maxDistance int64
 	var restaurantResponse GetAllRestaurantsResponse
 
@@ -111,9 +112,9 @@ func (request GetAllRestaurantsRequest) Validate(validate *validator.Validate) e
 
 // GetAllRestaurantsResponse provides the schema definition for get all restaurant response
 type GetAllRestaurantsResponse struct {
-	Total       int64        `json:"total"`
-	PageNumber  int64        `json:"page_number"`
-	PageSize    int64        `json:"page_size"`
-	TotalPages  int64        `json:"total_pages"`
-	Restaurants []Restaurant `json:"restaurants"`
+	Total       int64                   `json:"total"`
+	PageNumber  int64                   `json:"page_number"`
+	PageSize    int64                   `json:"page_size"`
+	TotalPages  int64                   `json:"total_pages"`
+	Restaurants []restaurant.Restaurant `json:"restaurants"`
 }

@@ -12,18 +12,18 @@ import (
 
 // PriceDao provides the schema definition for Price
 type PriceDao struct {
-	Amount   float64 `bson:"amount" json:"amount" validate:"required"`
-	Currency string  `bson:"currency" json:"currency" validate:"required"`
+	Amount   float64 `bson:"amount" json:"amount"`
+	Currency string  `bson:"currency" json:"currency"`
 }
 
 // VariantDao provides the schema definition for Products Variant data to be stored in mongodb
 type VariantDao struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	ProductID   primitive.ObjectID `bson:"product_id" json:"product_id"`
-	Name        string             `bson:"name" json:"name" validate:"required,min=6,max=30"`
-	Description string             `bson:"description" json:"description" validate:"max=120"`
-	Price       PriceDao           `bson:"price" json:"price" validate:"required,dive"`
-	InStock     *bool              `bson:"in_stock"  json:"in_stock" validate:"required"`
+	Name        string             `bson:"name" json:"name"`
+	Description string             `bson:"description" json:"description"`
+	Price       PriceDao           `bson:"price" json:"price"`
+	InStock     *bool              `bson:"in_stock"  json:"in_stock"`
 	CreatedAt   time.Time          `bson:"created_at" json:"created_at"`
 	UpdatedAt   time.Time          `bson:"updated_at" json:"updated_at"`
 }
@@ -41,6 +41,7 @@ func GetVariantDao(variant product.Variant) (VariantDao, errors.AppError) {
 		CreatedAt: variant.CreatedAt,
 		UpdatedAt: variant.UpdatedAt,
 	}
+
 	if variant.ID != "" {
 		variantObjectID, err := primitive.ObjectIDFromHex(variant.ID)
 		if err != nil {
@@ -48,24 +49,26 @@ func GetVariantDao(variant product.Variant) (VariantDao, errors.AppError) {
 		}
 		variantDao.ID = variantObjectID
 	}
-	if variant.ProductID != "" {
-		productObjectID, err := primitive.ObjectIDFromHex(variant.ProductID)
-		if err != nil {
-			return VariantDao{}, errors.NewAppError("Something went wrong", http.StatusInternalServerError, err)
-		}
-		variantDao.ProductID = productObjectID
+
+	// product id is required
+	productObjectID, err := primitive.ObjectIDFromHex(variant.ProductID)
+	if err != nil {
+		return VariantDao{}, errors.NewAppError("Something went wrong", http.StatusInternalServerError, err)
 	}
+	variantDao.ProductID = productObjectID
+
 	return variantDao, nil
 }
 
 // ProductDao provides the model definition for product data to be stored in mongodb
 type ProductDao struct {
 	ID           primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	RestaurantID primitive.ObjectID `bson:"restaurant_id" json:"restaurant_id" validate:"required"`
-	Name         string             `bson:"name" json:"name" validate:"required,min=6,max=30"`
-	Description  string             `bson:"description" json:"description" validate:"max=120"`
-	IsVeg        *bool              `bson:"is_veg" json:"is_veg" validate:"required"`
-	InStock      *bool              `bson:"in_stock"  json:"in_stock" validate:"required"`
+	RestaurantID primitive.ObjectID `bson:"restaurant_id" json:"restaurant_id"`
+	CategoryID   primitive.ObjectID `bson:"category_id" json:"category_id"`
+	Name         string             `bson:"name" json:"name"`
+	Description  string             `bson:"description" json:"description"`
+	IsVeg        *bool              `bson:"is_veg" json:"is_veg"`
+	InStock      *bool              `bson:"in_stock"  json:"in_stock"`
 	CreatedAt    time.Time          `bson:"created_at" json:"created_at"`
 	UpdatedAt    time.Time          `bson:"updated_at" json:"updated_at"`
 }
@@ -88,13 +91,19 @@ func GetProductDao(product product.Product) (ProductDao, errors.AppError) {
 		}
 		productDao.ID = productObjectID
 	}
-	if product.RestaurantID != "" {
-		restaurantObjectID, err := primitive.ObjectIDFromHex(product.RestaurantID)
-		if err != nil {
-			return ProductDao{}, errors.NewAppError("Something went wrong", http.StatusInternalServerError, err)
-		}
-		productDao.RestaurantID = restaurantObjectID
+
+	// restaurant id is required
+	restaurantObjectID, err := primitive.ObjectIDFromHex(product.RestaurantID)
+	if err != nil {
+		return ProductDao{}, errors.NewAppError("Something went wrong", http.StatusInternalServerError, err)
 	}
+	productDao.RestaurantID = restaurantObjectID
+
+	categoryObjectID, err := primitive.ObjectIDFromHex(product.CategoryID)
+	if err != nil {
+		return ProductDao{}, errors.NewAppError("Something went wrong", http.StatusInternalServerError, err)
+	}
+	productDao.CategoryID = categoryObjectID
 
 	return productDao, nil
 }

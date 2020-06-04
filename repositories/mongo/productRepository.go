@@ -21,11 +21,6 @@ const (
 	variantCollection = "variant"
 )
 
-type productDao struct {
-	product.Product
-	RestaurantID primitive.ObjectID `bson:"restaurant_id" json:"restaurant_id"`
-}
-
 type productRepository struct {
 	*mongo.Client
 	database string
@@ -53,7 +48,7 @@ func (db *productRepository) Create(ctx context.Context, product product.Product
 	productCollection := db.Database(db.database).Collection(productCollection)
 	insertProductResult, insertProductError := productCollection.InsertOne(insertProductCtx, productDao)
 	if insertProductError != nil {
-		return product, errors.NewAppError("Unable to insert product to DB",
+		return product, errors.NewAppError("Something went wrong",
 			http.StatusServiceUnavailable, insertProductError)
 	}
 
@@ -81,7 +76,7 @@ func (db *productRepository) Create(ctx context.Context, product product.Product
 	variantCollection := db.Database(db.database).Collection(variantCollection)
 	insertVariantResult, insertVariantError := variantCollection.InsertMany(insertVariantCtx, variants)
 	if insertVariantError != nil {
-		return product, errors.NewAppError("Unable to insert variant to DB",
+		return product, errors.NewAppError("Something went wrong",
 			http.StatusServiceUnavailable, insertVariantError)
 	}
 
@@ -124,7 +119,7 @@ func (db *productRepository) GetByID(ctx context.Context, productID string) (pro
 	collection := db.Database(db.database).Collection(productCollection)
 	cursor, findError := collection.Aggregate(findCtx, mongoDriver.Pipeline{match, lookupVariants})
 	if findError != nil {
-		return product.Product{}, errors.NewAppError("Unable to get data from DB",
+		return product.Product{}, errors.NewAppError("Something went wrong",
 			http.StatusInternalServerError, findError)
 	}
 
@@ -134,7 +129,7 @@ func (db *productRepository) GetByID(ctx context.Context, productID string) (pro
 	if cursor.Next(cursorCtx) {
 		decodeError := cursor.Decode(&productObj)
 		if decodeError != nil {
-			return product.Product{}, errors.NewAppError("Unable to decode categories",
+			return product.Product{}, errors.NewAppError("Something went wrong",
 				http.StatusInternalServerError, decodeError)
 		}
 	}
@@ -157,7 +152,7 @@ func (db *productRepository) DeleteByID(ctx context.Context, productID string) e
 	collection := db.Database(db.database).Collection(productCollection)
 	_, deleteError := collection.DeleteOne(deleteCtx, filter)
 	if deleteError != nil {
-		return errors.NewAppError("Unable to delete data from DB",
+		return errors.NewAppError("Something went wrong",
 			http.StatusInternalServerError, deleteError)
 	}
 
