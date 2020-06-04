@@ -9,10 +9,10 @@ import (
 	"github.com/dhyaniarun1993/foody-common/errors"
 )
 
-func (interactor *productInteractor) DeleteByID(ctx context.Context, auth authentication.Auth,
+func (interactor *productInteractor) DeleteProductByID(ctx context.Context, auth authentication.Auth,
 	productID string) errors.AppError {
 
-	product, getProductError := interactor.GetByID(ctx, auth, productID)
+	product, getProductError := interactor.GetProductByID(ctx, auth, productID)
 	if getProductError != nil {
 		return getProductError
 	}

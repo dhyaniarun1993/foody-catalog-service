@@ -15,7 +15,7 @@ func (handler *productHandler) deleteProductByID(w http.ResponseWriter, r *http.
 	params := mux.Vars(r)
 	productID := params["productId"]
 
-	serviceError := handler.productInteractor.DeleteByID(ctx, auth, productID)
+	serviceError := handler.productInteractor.DeleteProductByID(ctx, auth, productID)
 	if serviceError != nil {
 		logger.WithError(serviceError).Error("Got Error from service")
 		w.Header().Set("Content-Type", "application/json")

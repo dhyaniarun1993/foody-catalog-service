@@ -27,6 +27,21 @@ type Variant struct {
 	UpdatedAt   time.Time `bson:"updated_at" json:"updated_at"`
 }
 
+// Validate validates Variant schema
+func (variant Variant) Validate(validate *validator.Validate) errors.AppError {
+	var errMessage string
+	// validate struct data
+	err := validate.Struct(variant)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			errMessage = fmt.Sprintf("Invalid value for field '%s'", err.Field())
+			break
+		}
+		return errors.NewAppError(errMessage, http.StatusBadRequest, err)
+	}
+	return nil
+}
+
 // Product provides the model definition for Product
 type Product struct {
 	ID           string    `bson:"_id,omitempty" json:"id"`
@@ -41,7 +56,7 @@ type Product struct {
 	UpdatedAt    time.Time `bson:"updated_at" json:"updated_at"`
 }
 
-// Validate validates Restaurant schema
+// Validate validates Product schema
 func (product Product) Validate(validate *validator.Validate) errors.AppError {
 	var errMessage string
 	// validate struct data

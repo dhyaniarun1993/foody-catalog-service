@@ -31,6 +31,7 @@ type ProductRepository interface {
 	CreateProduct(ctx context.Context, product product.Product) (product.Product, errors.AppError)
 	CreateVariant(ctx context.Context, variant product.Variant) (product.Variant, errors.AppError)
 	GetProductByID(ctx context.Context, productID string) (product.Product, errors.AppError)
+	GetVariantByID(ctx context.Context, variantID string) (product.Variant, errors.AppError)
 	DeleteProductByID(ctx context.Context, productID string) errors.AppError
 	DeleteVariantByID(ctx context.Context, variantID string) errors.AppError
 	DeleteProductByRestaurantID(ctx context.Context, restaurantID string) errors.AppError

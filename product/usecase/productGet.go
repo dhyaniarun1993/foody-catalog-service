@@ -11,7 +11,7 @@ import (
 	"github.com/dhyaniarun1993/foody-common/errors"
 )
 
-func (interactor *productInteractor) GetByID(ctx context.Context, auth authentication.Auth,
+func (interactor *productInteractor) GetProductByID(ctx context.Context, auth authentication.Auth,
 	productID string) (product.Product, errors.AppError) {
 
 	// get Product from datastore

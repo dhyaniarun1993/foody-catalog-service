@@ -24,7 +24,7 @@ func (handler *productHandler) createProduct(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	result, serviceError := handler.productInteractor.Create(ctx, auth, product)
+	result, serviceError := handler.productInteractor.CreateProduct(ctx, auth, product)
 	if serviceError != nil {
 		logger.WithError(serviceError).Error("Got Error from service")
 		w.Header().Set("Content-Type", "application/json")

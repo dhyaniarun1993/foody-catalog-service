@@ -168,6 +168,40 @@ func (db *productRepository) GetProductByID(ctx context.Context,
 	return productObj, nil
 }
 
+func (db *productRepository) GetVariantByID(ctx context.Context, variantID string) (product.Variant, errors.AppError) {
+
+	var variantObj product.Variant
+	findCtx, findCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer findCancel()
+
+	variantObjectID, _ := primitive.ObjectIDFromHex(variantID)
+	filter := bson.D{
+		{
+			Key:   "_id",
+			Value: variantObjectID,
+		},
+	}
+
+	collection := db.Database(db.database).Collection(variantCollection)
+	cursor, findError := collection.Find(findCtx, filter)
+	if findError != nil {
+		return product.Variant{}, errors.NewAppError("Something went wrong",
+			http.StatusInternalServerError, findError)
+	}
+
+	cursorCtx, cursorCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cursorCancel()
+
+	if cursor.Next(cursorCtx) {
+		decodeError := cursor.Decode(&variantObj)
+		if decodeError != nil {
+			return product.Variant{}, errors.NewAppError("Something went wrong",
+				http.StatusInternalServerError, decodeError)
+		}
+	}
+	return variantObj, nil
+}
+
 func (db *productRepository) DeleteProductByID(ctx context.Context, productID string) errors.AppError {
 
 	productObjectID, _ := primitive.ObjectIDFromHex(productID)

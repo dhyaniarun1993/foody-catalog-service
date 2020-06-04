@@ -17,7 +17,7 @@ func (handler *productHandler) getProductByID(w http.ResponseWriter, r *http.Req
 	params := mux.Vars(r)
 	productID := params["productId"]
 
-	result, serviceError := handler.productInteractor.GetByID(ctx, auth, productID)
+	result, serviceError := handler.productInteractor.GetProductByID(ctx, auth, productID)
 	if serviceError != nil {
 		logger.WithError(serviceError).Error("Got Error from service")
 		w.Header().Set("Content-Type", "application/json")

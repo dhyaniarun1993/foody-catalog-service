@@ -15,17 +15,22 @@ import (
 
 type productRepository interface {
 	CreateProduct(ctx context.Context, product product.Product) (product.Product, errors.AppError)
+	CreateVariant(ctx context.Context, variant product.Variant) (product.Variant, errors.AppError)
 	GetProductByID(ctx context.Context, productID string) (product.Product, errors.AppError)
+	GetVariantByID(ctx context.Context, variantID string) (product.Variant, errors.AppError)
 	DeleteProductByID(ctx context.Context, productID string) errors.AppError
+	DeleteVariantByID(ctx context.Context, variantID string) errors.AppError
 }
 
 // Interactor provides interface for product interactor
 type Interactor interface {
-	Create(ctx context.Context, auth authentication.Auth,
-		product product.Product) (product.Product, errors.AppError)
-	GetByID(ctx context.Context, auth authentication.Auth,
-		productID string) (product.Product, errors.AppError)
-	DeleteByID(ctx context.Context, auth authentication.Auth, productID string) errors.AppError
+	CreateProduct(ctx context.Context, auth authentication.Auth, product product.Product) (product.Product, errors.AppError)
+	AddVariant(ctx context.Context, auth authentication.Auth,
+		productID string, variant product.Variant) (product.Variant, errors.AppError)
+	GetProductByID(ctx context.Context, auth authentication.Auth, productID string) (product.Product, errors.AppError)
+	DeleteProductByID(ctx context.Context, auth authentication.Auth, productID string) errors.AppError
+	RemoveVariant(ctx context.Context, auth authentication.Auth, productID string,
+		variantID string) errors.AppError
 }
 
 type productInteractor struct {

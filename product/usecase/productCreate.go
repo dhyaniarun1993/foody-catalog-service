@@ -10,7 +10,7 @@ import (
 	"github.com/dhyaniarun1993/foody-common/errors"
 )
 
-func (interactor *productInteractor) Create(ctx context.Context, auth authentication.Auth,
+func (interactor *productInteractor) CreateProduct(ctx context.Context, auth authentication.Auth,
 	productObj product.Product) (product.Product, errors.AppError) {
 
 	// validate product schema
