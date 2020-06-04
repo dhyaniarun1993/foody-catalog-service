@@ -46,7 +46,7 @@ func (interactor *productInteractor) Create(ctx context.Context, auth authentica
 		interactor.rbac.Can(auth.GetUserRole(), acl.PermissionCatalogWriteAny) {
 
 		var createProductError errors.AppError
-		productObj, createProductError = interactor.productRepository.Create(ctx, productObj)
+		productObj, createProductError = interactor.productRepository.CreateProduct(ctx, productObj)
 		return productObj, createProductError
 	}
 	return product.Product{}, errors.NewAppError("Forbidden", http.StatusForbidden, nil)

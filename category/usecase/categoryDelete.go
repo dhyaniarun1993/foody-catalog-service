@@ -38,7 +38,7 @@ func (interactor *categoryInteractor) DeleteByID(ctx context.Context, auth authe
 		interactor.rbac.Can(auth.GetUserRole(), acl.PermissionCatalogWriteAny) {
 
 		// delete products of the provided category
-		deleteProductError := interactor.productRepository.DeleteByCategoryID(ctx, categoryID)
+		deleteProductError := interactor.productRepository.DeleteProductByCategoryID(ctx, categoryID)
 		if deleteProductError != nil {
 			return deleteProductError
 		}

@@ -20,7 +20,7 @@ type categoryRepository interface {
 }
 
 type productRepository interface {
-	DeleteByCategoryID(ctx context.Context, categoryID string) errors.AppError
+	DeleteProductByCategoryID(ctx context.Context, categoryID string) errors.AppError
 }
 
 // Interactor provides interface for category interactor

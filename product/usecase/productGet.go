@@ -15,7 +15,7 @@ func (interactor *productInteractor) GetByID(ctx context.Context, auth authentic
 	productID string) (product.Product, errors.AppError) {
 
 	// get Product from datastore
-	productObj, repositoryError := interactor.productRepository.GetByID(ctx, productID)
+	productObj, repositoryError := interactor.productRepository.GetProductByID(ctx, productID)
 	if repositoryError != nil {
 		return product.Product{}, repositoryError
 	}

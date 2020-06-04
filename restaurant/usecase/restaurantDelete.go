@@ -28,7 +28,7 @@ func (interactor *restaurantInteractor) DeleteByID(ctx context.Context, auth aut
 		}
 
 		// delete products of the provided restaurant
-		deleteProductError := interactor.productRepository.DeleteByRestaurantID(ctx, restaurantID)
+		deleteProductError := interactor.productRepository.DeleteProductByRestaurantID(ctx, restaurantID)
 		if deleteProductError != nil {
 			return deleteProductError
 		}

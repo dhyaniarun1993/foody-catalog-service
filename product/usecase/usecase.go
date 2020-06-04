@@ -14,9 +14,9 @@ import (
 )
 
 type productRepository interface {
-	Create(ctx context.Context, product product.Product) (product.Product, errors.AppError)
-	GetByID(ctx context.Context, productID string) (product.Product, errors.AppError)
-	DeleteByID(ctx context.Context, productID string) errors.AppError
+	CreateProduct(ctx context.Context, product product.Product) (product.Product, errors.AppError)
+	GetProductByID(ctx context.Context, productID string) (product.Product, errors.AppError)
+	DeleteProductByID(ctx context.Context, productID string) errors.AppError
 }
 
 // Interactor provides interface for product interactor

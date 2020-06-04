@@ -28,11 +28,13 @@ type RestaurantRepository interface {
 
 // ProductRepository provides interface for Product repository
 type ProductRepository interface {
-	Create(ctx context.Context, product product.Product) (product.Product, errors.AppError)
-	GetByID(ctx context.Context, productID string) (product.Product, errors.AppError)
-	DeleteByID(ctx context.Context, productID string) errors.AppError
-	DeleteByRestaurantID(ctx context.Context, restaurantID string) errors.AppError
-	DeleteByCategoryID(ctx context.Context, categoryID string) errors.AppError
+	CreateProduct(ctx context.Context, product product.Product) (product.Product, errors.AppError)
+	CreateVariant(ctx context.Context, variant product.Variant) (product.Variant, errors.AppError)
+	GetProductByID(ctx context.Context, productID string) (product.Product, errors.AppError)
+	DeleteProductByID(ctx context.Context, productID string) errors.AppError
+	DeleteVariantByID(ctx context.Context, variantID string) errors.AppError
+	DeleteProductByRestaurantID(ctx context.Context, restaurantID string) errors.AppError
+	DeleteProductByCategoryID(ctx context.Context, categoryID string) errors.AppError
 }
 
 // CategoryRepository provides interface for Category repository

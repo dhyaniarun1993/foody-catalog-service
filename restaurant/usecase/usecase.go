@@ -28,7 +28,7 @@ type categoryRespository interface {
 }
 
 type productRepository interface {
-	DeleteByRestaurantID(context.Context, string) errors.AppError
+	DeleteProductByRestaurantID(context.Context, string) errors.AppError
 }
 
 // Interactor provides interface for restaurant interactor

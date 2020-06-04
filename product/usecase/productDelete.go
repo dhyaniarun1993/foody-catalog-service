@@ -28,7 +28,7 @@ func (interactor *productInteractor) DeleteByID(ctx context.Context, auth authen
 		interactor.rbac.Can(auth.GetUserRole(), acl.PermissionCatalogWriteOwn)) ||
 		interactor.rbac.Can(auth.GetUserRole(), acl.PermissionCatalogWriteAny) {
 
-		repositoryError := interactor.productRepository.DeleteByID(ctx, productID)
+		repositoryError := interactor.productRepository.DeleteProductByID(ctx, productID)
 		return repositoryError
 	}
 	return errors.NewAppError("Forbidden", http.StatusForbidden, nil)

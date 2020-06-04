@@ -31,7 +31,8 @@ func NewProductRepository(mongoClient *mongo.Client, database string) repositori
 	return &productRepository{mongoClient, database}
 }
 
-func (db *productRepository) Create(ctx context.Context, product product.Product) (product.Product, errors.AppError) {
+func (db *productRepository) CreateProduct(ctx context.Context,
+	product product.Product) (product.Product, errors.AppError) {
 
 	product.CreatedAt = time.Now()
 	product.UpdatedAt = time.Now()
@@ -61,6 +62,8 @@ func (db *productRepository) Create(ctx context.Context, product product.Product
 	for i := range product.Variants {
 		// Add product id to product variant data
 		product.Variants[i].ProductID = productObjectID.Hex()
+		product.Variants[i].CreatedAt = time.Now()
+		product.Variants[i].UpdatedAt = time.Now()
 		// convert product variant model to product variant dao
 		variantDao, err := dao.GetVariantDao(product.Variants[i])
 		if err != nil {
@@ -89,7 +92,36 @@ func (db *productRepository) Create(ctx context.Context, product product.Product
 	return product, nil
 }
 
-func (db *productRepository) GetByID(ctx context.Context, productID string) (product.Product, errors.AppError) {
+func (db *productRepository) CreateVariant(ctx context.Context,
+	variant product.Variant) (product.Variant, errors.AppError) {
+
+	variant.CreatedAt = time.Now()
+	variant.UpdatedAt = time.Now()
+
+	variantDao, daoErr := dao.GetVariantDao(variant)
+	if daoErr != nil {
+		return variant, daoErr
+	}
+
+	insertVariantCtx, insertVariantCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer insertVariantCancel()
+	// insert variant data in datastore
+	variantCollection := db.Database(db.database).Collection(variantCollection)
+	insertVariantResult, insertVariantError := variantCollection.InsertOne(insertVariantCtx, variantDao)
+	if insertVariantError != nil {
+		return variant, errors.NewAppError("Something went wrong",
+			http.StatusServiceUnavailable, insertVariantError)
+	}
+
+	// extract id  of the product inserted
+	variantObjectID, _ := insertVariantResult.InsertedID.(primitive.ObjectID)
+	variant.ID = variantObjectID.Hex()
+
+	return variant, nil
+}
+
+func (db *productRepository) GetProductByID(ctx context.Context,
+	productID string) (product.Product, errors.AppError) {
 
 	var productObj product.Product
 	findCtx, findCancel := context.WithTimeout(ctx, 1*time.Second)
@@ -136,7 +168,7 @@ func (db *productRepository) GetByID(ctx context.Context, productID string) (pro
 	return productObj, nil
 }
 
-func (db *productRepository) DeleteByID(ctx context.Context, productID string) errors.AppError {
+func (db *productRepository) DeleteProductByID(ctx context.Context, productID string) errors.AppError {
 
 	productObjectID, _ := primitive.ObjectIDFromHex(productID)
 	deleteVariantFilter := bson.D{
@@ -174,7 +206,31 @@ func (db *productRepository) DeleteByID(ctx context.Context, productID string) e
 	return nil
 }
 
-func (db *productRepository) DeleteByRestaurantID(ctx context.Context, restaurantID string) errors.AppError {
+func (db *productRepository) DeleteVariantByID(ctx context.Context,
+	variantID string) errors.AppError {
+
+	deleteCtx, deleteCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer deleteCancel()
+
+	objectID, _ := primitive.ObjectIDFromHex(variantID)
+	filter := bson.D{
+		{
+			Key:   "_id",
+			Value: objectID,
+		},
+	}
+
+	collection := db.Database(db.database).Collection(variantCollection)
+
+	_, deleteErr := collection.DeleteOne(deleteCtx, filter)
+	if deleteErr != nil {
+		return errors.NewAppError("Something went wrong", http.StatusInternalServerError, deleteErr)
+	}
+	return nil
+}
+
+func (db *productRepository) DeleteProductByRestaurantID(ctx context.Context,
+	restaurantID string) errors.AppError {
 
 	// Todo: Perform all the operations in transaction
 	findProductCtx, findProductCancel := context.WithTimeout(ctx, 1*time.Second)
@@ -242,7 +298,8 @@ func (db *productRepository) DeleteByRestaurantID(ctx context.Context, restauran
 	return nil
 }
 
-func (db *productRepository) DeleteByCategoryID(ctx context.Context, categoryID string) errors.AppError {
+func (db *productRepository) DeleteProductByCategoryID(ctx context.Context,
+	categoryID string) errors.AppError {
 
 	// Todo: Perform all the operations in transaction
 	findProductCtx, findProductCancel := context.WithTimeout(ctx, 1*time.Second)
