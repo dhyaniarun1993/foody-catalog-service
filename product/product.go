@@ -19,7 +19,7 @@ type Price struct {
 type Variant struct {
 	ID          string    `bson:"_id,omitempty" json:"id"`
 	ProductID   string    `bson:"product_id" json:"product_id"`
-	Name        string    `bson:"name" json:"name" validate:"required,min=6,max=30"`
+	Name        string    `bson:"name" json:"name" validate:"required,min=3,max=30"`
 	Description string    `bson:"description" json:"description" validate:"max=120"`
 	Price       Price     `bson:"price" json:"price" validate:"required,dive"`
 	InStock     *bool     `bson:"in_stock"  json:"in_stock" validate:"required"`

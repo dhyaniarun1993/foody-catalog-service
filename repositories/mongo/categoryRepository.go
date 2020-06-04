@@ -31,6 +31,7 @@ func NewCategoryRepository(mongoClient *mongo.Client, database string) repositor
 func (db *categoryRepository) Create(ctx context.Context,
 	category category.Category) (category.Category, errors.AppError) {
 
+	category.ID = ""
 	category.CreatedAt = time.Now()
 	category.UpdatedAt = time.Now()
 

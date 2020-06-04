@@ -41,4 +41,11 @@ func (handler *productHandler) LoadRoutes(router *mux.Router) {
 		middlewares.ChainHandlerFuncMiddlewares(handler.deleteProductByID,
 			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("DELETE")
 
+	router.Handle("/v1/catalog/products/{productId}/variants",
+		middlewares.ChainHandlerFuncMiddlewares(handler.AddVariant,
+			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("POST")
+
+	router.Handle("/v1/catalog/products/{productId}/variants/{variantId}",
+		middlewares.ChainHandlerFuncMiddlewares(handler.RemoveVariant,
+			authentication.AuthHandler(), middlewares.TimeoutHandler(2*time.Second))).Methods("DELETE")
 }

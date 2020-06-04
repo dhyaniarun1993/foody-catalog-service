@@ -34,6 +34,7 @@ func NewProductRepository(mongoClient *mongo.Client, database string) repositori
 func (db *productRepository) CreateProduct(ctx context.Context,
 	product product.Product) (product.Product, errors.AppError) {
 
+	product.ID = ""
 	product.CreatedAt = time.Now()
 	product.UpdatedAt = time.Now()
 
@@ -95,6 +96,7 @@ func (db *productRepository) CreateProduct(ctx context.Context,
 func (db *productRepository) CreateVariant(ctx context.Context,
 	variant product.Variant) (product.Variant, errors.AppError) {
 
+	variant.ID = ""
 	variant.CreatedAt = time.Now()
 	variant.UpdatedAt = time.Now()
 

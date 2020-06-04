@@ -33,6 +33,7 @@ func NewRestaurantRepository(mongoClient *mongo.Client, database string) reposit
 func (db *restaurantRepository) Create(ctx context.Context,
 	restaurant restaurant.Restaurant) (restaurant.Restaurant, errors.AppError) {
 
+	restaurant.ID = ""
 	restaurant.CreatedAt = time.Now()
 	restaurant.UpdatedAt = time.Now()
 	restaurant.Address.Location.Type = "Point"
