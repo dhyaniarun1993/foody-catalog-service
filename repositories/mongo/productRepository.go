@@ -138,22 +138,37 @@ func (db *productRepository) GetByID(ctx context.Context, productID string) (pro
 
 func (db *productRepository) DeleteByID(ctx context.Context, productID string) errors.AppError {
 
-	deleteCtx, deleteCancel := context.WithTimeout(ctx, 1*time.Second)
-	defer deleteCancel()
-
 	productObjectID, _ := primitive.ObjectIDFromHex(productID)
-	filter := bson.D{
+	deleteVariantFilter := bson.D{
+		{
+			Key:   "product_id",
+			Value: productObjectID,
+		},
+	}
+	deleteVariantCtx, deleteVariantCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer deleteVariantCancel()
+
+	// delete all the variants that belong to the product provided
+	variantCollection := db.Database(db.database).Collection(variantCollection)
+	_, deleteVariantError := variantCollection.DeleteMany(deleteVariantCtx, deleteVariantFilter)
+	if deleteVariantError != nil {
+		return errors.NewAppError("Something went wrong", http.StatusInternalServerError, deleteVariantError)
+	}
+
+	deleteProductFilter := bson.D{
 		{
 			Key:   "_id",
 			Value: productObjectID,
 		},
 	}
+	deleteProductCtx, deleteProductCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer deleteProductCancel()
 
-	collection := db.Database(db.database).Collection(productCollection)
-	_, deleteError := collection.DeleteOne(deleteCtx, filter)
-	if deleteError != nil {
-		return errors.NewAppError("Something went wrong",
-			http.StatusInternalServerError, deleteError)
+	// delete all the products that belong to the category provided
+	productCollection := db.Database(db.database).Collection(productCollection)
+	_, deleteProductError := productCollection.DeleteOne(deleteProductCtx, deleteProductFilter)
+	if deleteProductError != nil {
+		return errors.NewAppError("Something went wrong", http.StatusInternalServerError, deleteProductError)
 	}
 
 	return nil
