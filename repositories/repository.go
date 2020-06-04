@@ -32,6 +32,7 @@ type ProductRepository interface {
 	GetByID(ctx context.Context, productID string) (product.Product, errors.AppError)
 	DeleteByID(ctx context.Context, productID string) errors.AppError
 	DeleteByRestaurantID(ctx context.Context, restaurantID string) errors.AppError
+	DeleteByCategoryID(ctx context.Context, categoryID string) errors.AppError
 }
 
 // CategoryRepository provides interface for Category repository

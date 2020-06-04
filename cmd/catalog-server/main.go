@@ -43,7 +43,7 @@ func main() {
 	restaurantInteractor := restaurantUsecase.NewRestaurantInteractor(restaurantRepository,
 		categoryRepository, productRepository, logger, rbac, validate)
 	categoryInteractor := categoryUsecase.NewCategoryInteractor(categoryRepository,
-		restaurantInteractor, logger, rbac, validate)
+		productRepository, restaurantInteractor, logger, rbac, validate)
 	productInteractor := productUsecase.NewProductInteractor(productRepository, restaurantInteractor,
 		categoryInteractor, logger, rbac, validate)
 

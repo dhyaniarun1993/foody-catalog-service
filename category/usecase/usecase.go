@@ -19,6 +19,10 @@ type categoryRepository interface {
 	DeleteByID(ctx context.Context, categoryID string) errors.AppError
 }
 
+type productRepository interface {
+	DeleteByCategoryID(ctx context.Context, categoryID string) errors.AppError
+}
+
 // Interactor provides interface for category interactor
 type Interactor interface {
 	Create(ctx context.Context, auth authentication.Auth,
@@ -30,6 +34,7 @@ type Interactor interface {
 
 type categoryInteractor struct {
 	categoryRepository   categoryRepository
+	productRepository    productRepository
 	restaurantInteractor restaurantUsecase.Interactor
 	logger               *logger.Logger
 	validator            *validator.Validate
@@ -37,12 +42,13 @@ type categoryInteractor struct {
 }
 
 // NewCategoryInteractor creates and return category Interactor
-func NewCategoryInteractor(categoryRepository categoryRepository,
-	restaurantInteractor restaurantUsecase.Interactor,
-	logger *logger.Logger, rbac acl.RBAC, validator *validator.Validate) Interactor {
+func NewCategoryInteractor(categoryRepository categoryRepository, productRepository productRepository,
+	restaurantInteractor restaurantUsecase.Interactor, logger *logger.Logger, rbac acl.RBAC,
+	validator *validator.Validate) Interactor {
 
 	return &categoryInteractor{
 		categoryRepository:   categoryRepository,
+		productRepository:    productRepository,
 		restaurantInteractor: restaurantInteractor,
 		logger:               logger,
 		validator:            validator,

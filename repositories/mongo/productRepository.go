@@ -226,3 +226,71 @@ func (db *productRepository) DeleteByRestaurantID(ctx context.Context, restauran
 
 	return nil
 }
+
+func (db *productRepository) DeleteByCategoryID(ctx context.Context, categoryID string) errors.AppError {
+
+	// Todo: Perform all the operations in transaction
+	findProductCtx, findProductCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer findProductCancel()
+
+	categoryObjectID, _ := primitive.ObjectIDFromHex(categoryID)
+	productFilter := bson.D{
+		{
+			Key:   "category_id",
+			Value: categoryObjectID,
+		},
+	}
+	productCollection := db.Database(db.database).Collection(productCollection)
+
+	// find all the products with provided category ID
+	cursor, findError := productCollection.Find(findProductCtx, productFilter)
+	if findError != nil {
+		return errors.NewAppError("Something went wrong", http.StatusInternalServerError, findError)
+	}
+
+	// create product ID list
+	productIDs := []primitive.ObjectID{}
+	cursorCtx, cursorCancel := context.WithCancel(ctx)
+	defer cursorCancel()
+	for cursor.Next(cursorCtx) {
+		var productDao dao.ProductDao
+		decodeError := cursor.Decode(&productDao)
+		if decodeError != nil {
+			return errors.NewAppError("Something went wrong", http.StatusInternalServerError, decodeError)
+		}
+		productIDs = append(productIDs, productDao.ID)
+	}
+
+	deleteVariantFilter := bson.D{
+		{
+			Key: "product_id",
+			Value: bson.D{
+				{
+					Key:   "$in",
+					Value: productIDs,
+				},
+			},
+		},
+	}
+
+	deleteVariantCtx, deleteVariantCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer deleteVariantCancel()
+
+	// delete all the variants that belong to the above product list
+	variantCollection := db.Database(db.database).Collection(variantCollection)
+	_, deleteVariantError := variantCollection.DeleteMany(deleteVariantCtx, deleteVariantFilter)
+	if deleteVariantError != nil {
+		return errors.NewAppError("Something went wrong", http.StatusInternalServerError, deleteVariantError)
+	}
+
+	deleteProductCtx, deleteProductCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer deleteProductCancel()
+
+	// delete all the products that belong to the category provided
+	_, deleteProductError := productCollection.DeleteMany(deleteProductCtx, productFilter)
+	if deleteProductError != nil {
+		return errors.NewAppError("Something went wrong", http.StatusInternalServerError, deleteProductError)
+	}
+
+	return nil
+}
