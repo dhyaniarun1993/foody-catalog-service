@@ -41,7 +41,7 @@ func main() {
 
 	healthInteractor := health.NewHealthInteractor(healthRepository, logger)
 	restaurantInteractor := restaurantUsecase.NewRestaurantInteractor(restaurantRepository,
-		logger, rbac, validate)
+		categoryRepository, productRepository, logger, rbac, validate)
 	categoryInteractor := categoryUsecase.NewCategoryInteractor(categoryRepository,
 		restaurantInteractor, logger, rbac, validate)
 	productInteractor := productUsecase.NewProductInteractor(productRepository, restaurantInteractor,

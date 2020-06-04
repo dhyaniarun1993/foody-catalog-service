@@ -47,7 +47,7 @@ type Restaurant struct {
 	ReviewsCount     int64     `bson:"reviews_count" json:"reviews_count"`
 	Address          Address   `bson:"address" json:"address" validate:"required,dive"`
 	RestaurantFees   Fees      `bson:"restaurant_fees" json:"restaurant_fees" validate:"required,dive"`
-	IsOpen           *bool     `bson:"is_open" json:"is_open" validate:"required"`
+	IsOpen           bool      `bson:"is_open" json:"is_open"`
 	CreatedAt        time.Time `bson:"created_at" json:"created_at"`
 	UpdatedAt        time.Time `bson:"updated_at" json:"updated_at"`
 }

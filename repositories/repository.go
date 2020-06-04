@@ -31,6 +31,7 @@ type ProductRepository interface {
 	Create(ctx context.Context, product product.Product) (product.Product, errors.AppError)
 	GetByID(ctx context.Context, productID string) (product.Product, errors.AppError)
 	DeleteByID(ctx context.Context, productID string) errors.AppError
+	DeleteByRestaurantID(ctx context.Context, restaurantID string) errors.AppError
 }
 
 // CategoryRepository provides interface for Category repository
@@ -38,4 +39,5 @@ type CategoryRepository interface {
 	Create(ctx context.Context, category category.Category) (category.Category, errors.AppError)
 	GetByID(ctx context.Context, categoryID string) (category.Category, errors.AppError)
 	DeleteByID(ctx context.Context, categoryID string) errors.AppError
+	DeleteByRestaurantID(ctx context.Context, restaurantID string) errors.AppError
 }

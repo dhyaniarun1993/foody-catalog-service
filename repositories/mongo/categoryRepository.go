@@ -112,3 +112,25 @@ func (db *categoryRepository) DeleteByID(ctx context.Context, categoryID string)
 	}
 	return nil
 }
+
+func (db *categoryRepository) DeleteByRestaurantID(ctx context.Context, restaurantID string) errors.AppError {
+
+	deleteCtx, deleteCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer deleteCancel()
+
+	objectID, _ := primitive.ObjectIDFromHex(restaurantID)
+	filter := bson.D{
+		{
+			Key:   "restaurant_id",
+			Value: objectID,
+		},
+	}
+
+	collection := db.Database(db.database).Collection(categoryCollection)
+
+	_, deleteErr := collection.DeleteMany(deleteCtx, filter)
+	if deleteErr != nil {
+		return errors.NewAppError("Something went wrong", http.StatusInternalServerError, deleteErr)
+	}
+	return nil
+}

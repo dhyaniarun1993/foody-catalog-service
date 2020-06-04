@@ -23,6 +23,14 @@ type restaurantRepository interface {
 		int64) (int64, errors.AppError)
 }
 
+type categoryRespository interface {
+	DeleteByRestaurantID(context.Context, string) errors.AppError
+}
+
+type productRepository interface {
+	DeleteByRestaurantID(context.Context, string) errors.AppError
+}
+
 // Interactor provides interface for restaurant interactor
 type Interactor interface {
 	Create(ctx context.Context, auth authentication.Auth,
@@ -36,16 +44,21 @@ type Interactor interface {
 
 type restaurantInteractor struct {
 	restaurantRepository restaurantRepository
+	categoryRespository  categoryRespository
+	productRepository    productRepository
 	logger               *logger.Logger
 	rbac                 acl.RBAC
 	validator            *validator.Validate
 }
 
 // NewRestaurantInteractor creates and return restaurant Interactor
-func NewRestaurantInteractor(restaurantRepository restaurantRepository,
-	logger *logger.Logger, rbac acl.RBAC, validator *validator.Validate) Interactor {
+func NewRestaurantInteractor(restaurantRepository restaurantRepository, categoryRespository categoryRespository,
+	productRepository productRepository, logger *logger.Logger, rbac acl.RBAC,
+	validator *validator.Validate) Interactor {
 	return &restaurantInteractor{
 		restaurantRepository: restaurantRepository,
+		categoryRespository:  categoryRespository,
+		productRepository:    productRepository,
 		logger:               logger,
 		rbac:                 rbac,
 		validator:            validator,

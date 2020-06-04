@@ -67,8 +67,8 @@ type ProductDao struct {
 	CategoryID   primitive.ObjectID `bson:"category_id" json:"category_id"`
 	Name         string             `bson:"name" json:"name"`
 	Description  string             `bson:"description" json:"description"`
-	IsVeg        *bool              `bson:"is_veg" json:"is_veg"`
-	InStock      *bool              `bson:"in_stock"  json:"in_stock"`
+	IsVeg        bool               `bson:"is_veg" json:"is_veg"`
+	InStock      bool               `bson:"in_stock"  json:"in_stock"`
 	CreatedAt    time.Time          `bson:"created_at" json:"created_at"`
 	UpdatedAt    time.Time          `bson:"updated_at" json:"updated_at"`
 }

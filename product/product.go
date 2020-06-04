@@ -34,8 +34,8 @@ type Product struct {
 	CategoryID   string    `bson:"category_id" json:"category_id" validate:"required"`
 	Name         string    `bson:"name" json:"name" validate:"required,min=6,max=30"`
 	Description  string    `bson:"description" json:"description" validate:"max=120"`
-	IsVeg        *bool     `bson:"is_veg" json:"is_veg" validate:"required"`
-	InStock      *bool     `bson:"in_stock"  json:"in_stock" validate:"required"`
+	IsVeg        bool      `bson:"is_veg" json:"is_veg"`
+	InStock      bool      `bson:"in_stock"  json:"in_stock" validate:"required"`
 	Variants     []Variant `bson:"variants" json:"variants,omitempty" validate:"required,dive"`
 	CreatedAt    time.Time `bson:"created_at" json:"created_at"`
 	UpdatedAt    time.Time `bson:"updated_at" json:"updated_at"`

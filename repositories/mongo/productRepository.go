@@ -158,3 +158,71 @@ func (db *productRepository) DeleteByID(ctx context.Context, productID string) e
 
 	return nil
 }
+
+func (db *productRepository) DeleteByRestaurantID(ctx context.Context, restaurantID string) errors.AppError {
+
+	// Todo: Perform all the operations in transaction
+	findProductCtx, findProductCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer findProductCancel()
+
+	restaurantObjectID, _ := primitive.ObjectIDFromHex(restaurantID)
+	productFilter := bson.D{
+		{
+			Key:   "restaurant_id",
+			Value: restaurantObjectID,
+		},
+	}
+	productCollection := db.Database(db.database).Collection(productCollection)
+
+	// find all the products with provided restaurant ID
+	cursor, findError := productCollection.Find(findProductCtx, productFilter)
+	if findError != nil {
+		return errors.NewAppError("Something went wrong", http.StatusInternalServerError, findError)
+	}
+
+	// create product ID list
+	productIDs := []primitive.ObjectID{}
+	cursorCtx, cursorCancel := context.WithCancel(ctx)
+	defer cursorCancel()
+	for cursor.Next(cursorCtx) {
+		var productDao dao.ProductDao
+		decodeError := cursor.Decode(&productDao)
+		if decodeError != nil {
+			return errors.NewAppError("Something went wrong", http.StatusInternalServerError, decodeError)
+		}
+		productIDs = append(productIDs, productDao.ID)
+	}
+
+	deleteVariantFilter := bson.D{
+		{
+			Key: "product_id",
+			Value: bson.D{
+				{
+					Key:   "$in",
+					Value: productIDs,
+				},
+			},
+		},
+	}
+
+	deleteVariantCtx, deleteVariantCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer deleteVariantCancel()
+
+	// delete all the variants that belong to the above product list
+	variantCollection := db.Database(db.database).Collection(variantCollection)
+	_, deleteVariantError := variantCollection.DeleteMany(deleteVariantCtx, deleteVariantFilter)
+	if deleteVariantError != nil {
+		return errors.NewAppError("Something went wrong", http.StatusInternalServerError, deleteVariantError)
+	}
+
+	deleteProductCtx, deleteProductCancel := context.WithTimeout(ctx, 1*time.Second)
+	defer deleteProductCancel()
+
+	// delete all the products that belong to the restaurant
+	_, deleteProductError := productCollection.DeleteMany(deleteProductCtx, productFilter)
+	if deleteProductError != nil {
+		return errors.NewAppError("Something went wrong", http.StatusInternalServerError, deleteProductError)
+	}
+
+	return nil
+}
