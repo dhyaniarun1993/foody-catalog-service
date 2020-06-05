@@ -2,14 +2,6 @@
 
 
 [[projects]]
-  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
-  name = "github.com/davecgh/go-spew"
-  packages = ["spew"]
-  pruneopts = "UT"
-  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
-  version = "v1.1.1"
-
-[[projects]]
   branch = "master"
   digest = "1:4f70778d8ea09fa75c2cdf089fa2d80819210b872b129837384d0a34921c52cb"
   name = "github.com/dhyaniarun1993/foody-common"
@@ -141,22 +133,6 @@
   pruneopts = "UT"
   revision = "614d223910a179a466c1767a985424175c39b465"
   version = "v0.9.1"
-
-[[projects]]
-  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
-  name = "github.com/pmezard/go-difflib"
-  packages = ["difflib"]
-  pruneopts = "UT"
-  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
-  version = "v1.0.0"
-
-[[projects]]
-  digest = "1:0bd81087c12be521236e09538226d5541a3d600930e42b9533d245ce3126ee28"
-  name = "github.com/stretchr/testify"
-  packages = ["assert"]
-  pruneopts = "UT"
-  revision = "004e3cb72213e5e727e4e08f668ee6c8f27e5d32"
-  version = "v1.6.0"
 
 [[projects]]
   digest = "1:cd1ad050707f64cda6b630924df144280096bab2b63ab0ba9cff135a66165c09"
@@ -319,14 +295,6 @@
   revision = "21c910fc6d9c3556c28252b04beb17de0c2d40ec"
   version = "v9.31.0"
 
-[[projects]]
-  branch = "v3"
-  digest = "1:f87d6c8edf5e57ae4a355abc05aca1dbf38b073068bba96c1fbbff852a1e2fd3"
-  name = "gopkg.in/yaml.v3"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "2ff61e1afc866138abf1a8adf3cc89721090ac31"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -343,9 +311,9 @@
     "github.com/gorilla/schema",
     "github.com/kelseyhightower/envconfig",
     "github.com/mikespook/gorbac",
-    "github.com/stretchr/testify/assert",
     "go.mongodb.org/mongo-driver/bson",
     "go.mongodb.org/mongo-driver/bson/primitive",
+    "go.mongodb.org/mongo-driver/mongo",
     "go.mongodb.org/mongo-driver/mongo/options",
     "go.mongodb.org/mongo-driver/mongo/readpref",
     "gopkg.in/go-playground/validator.v9",
