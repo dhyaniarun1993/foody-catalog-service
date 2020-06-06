@@ -1,4 +1,4 @@
-# foody-catalog-service
+# foody-catalog-service(In Development)
 This project exposes Apis(written in Golang) to manage catalog of the foody system.
 
 To know about the architecture of full product, click [here](https://github.com/dhyaniarun1993/foody-documentation "Foody documentation"). 
@@ -65,6 +65,8 @@ Note: This service depends on Nginx and Oauth service to validate the Authorizat
 - [x] Add, Get and Remove variant from restaurant and category(Only merchants are allowed to perform this operations)
 
 Refer to the Api documentation below to know more.
+
+Note: Api schema might change.
 
 Api documentation can be found at [link](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/dhyaniarun1993/foody-catalog-service/master/docs/swagger.yaml "Foody API documentation" )
 
