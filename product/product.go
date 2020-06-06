@@ -11,15 +11,16 @@ import (
 
 // Price provides the schema definition for Price
 type Price struct {
-	Amount   float64 `bson:"amount" json:"amount" validate:"required"`
-	Currency string  `bson:"currency" json:"currency" validate:"required"`
+	Amount float64 `bson:"amount" json:"amount" validate:"required"`
+	// Todo validate Currency string
+	Currency string `bson:"currency" json:"currency" validate:"required"`
 }
 
 // Variant provides the schema definition for Products Variant
 type Variant struct {
 	ID          string    `bson:"_id,omitempty" json:"id"`
 	ProductID   string    `bson:"product_id" json:"product_id"`
-	Name        string    `bson:"name" json:"name" validate:"required,min=3,max=30"`
+	Name        string    `bson:"name" json:"name" validate:"required,min=2,max=30"`
 	Description string    `bson:"description" json:"description" validate:"max=120"`
 	Price       Price     `bson:"price" json:"price" validate:"required,dive"`
 	InStock     *bool     `bson:"in_stock"  json:"in_stock" validate:"required"`
@@ -47,7 +48,7 @@ type Product struct {
 	ID           string    `bson:"_id,omitempty" json:"id"`
 	RestaurantID string    `bson:"restaurant_id" json:"restaurant_id" validate:"required"`
 	CategoryID   string    `bson:"category_id" json:"category_id" validate:"required"`
-	Name         string    `bson:"name" json:"name" validate:"required,min=6,max=30"`
+	Name         string    `bson:"name" json:"name" validate:"required,min=2,max=30"`
 	Description  string    `bson:"description" json:"description" validate:"max=120"`
 	IsVeg        bool      `bson:"is_veg" json:"is_veg"`
 	InStock      bool      `bson:"in_stock"  json:"in_stock" validate:"required"`

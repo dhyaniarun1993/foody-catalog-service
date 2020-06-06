@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"time"
 
-	categoryUsecase "github.com/dhyaniarun1993/foody-catalog-service/category/usecase"
-
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
+	"github.com/rs/cors"
 	"gopkg.in/go-playground/validator.v9"
 
 	"github.com/dhyaniarun1993/foody-catalog-service/acl"
+	categoryUsecase "github.com/dhyaniarun1993/foody-catalog-service/category/usecase"
 	"github.com/dhyaniarun1993/foody-catalog-service/cmd/catalog-server/config"
 	httpHandler "github.com/dhyaniarun1993/foody-catalog-service/handlers/http"
 	"github.com/dhyaniarun1993/foody-catalog-service/health"
@@ -62,8 +62,15 @@ func main() {
 	categoryHandler.LoadRoutes(router)
 	productHandler.LoadRoutes(router)
 	serverAddress := ":" + fmt.Sprint(config.Port)
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedHeaders: []string{"X-User-Id", "X-User-Role", "X-Client-Id", "Content-Type"},
+		AllowedMethods: []string{"GET", "PUT", "POST", "DELETE", "OPTION"},
+		// Enable Debugging for testing, consider disabling in production
+		// Debug: true,
+	})
 	srv := &http.Server{
-		Handler:      router,
+		Handler:      c.Handler(router),
 		Addr:         serverAddress,
 		WriteTimeout: 3 * time.Second,
 		ReadTimeout:  3 * time.Second,

@@ -14,7 +14,7 @@ import (
 type Category struct {
 	ID           string            `bson:"_id,omitempty" json:"id"`
 	RestaurantID string            `bson:"restaurant_id,omitempty" json:"restaurant_id" validate:"required"`
-	Name         string            `bson:"name" json:"name" validate:"required,min=6,max=30"`
+	Name         string            `bson:"name" json:"name" validate:"required,min=2,max=30"`
 	Description  string            `bson:"description" json:"description" validate:"max=120"`
 	Products     []product.Product `bson:"products" json:"products,omitempty"`
 	CreatedAt    time.Time         `bson:"created_at" json:"created_at"`

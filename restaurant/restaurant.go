@@ -34,14 +34,14 @@ type Address struct {
 // GeoJSON provides the model definition for Geo Location
 type GeoJSON struct {
 	Type        string    `bson:"type" json:"-"`
-	Coordinates []float64 `bson:"coordinates" json:"coordinates" validate:"required"`
+	Coordinates []float64 `bson:"coordinates" json:"coordinates" validate:"required,min=2,max=2"`
 }
 
 // Restaurant provides the model definition for Restaurant
 type Restaurant struct {
 	ID               string    `bson:"_id,omitempty" json:"id"`
 	MerchantID       string    `bson:"merchant_id" json:"merchant_id" validate:"required"`
-	Name             string    `bson:"name" json:"name" validate:"required,min=6,max=30"`
+	Name             string    `bson:"name" json:"name" validate:"required,min=2,max=30"`
 	Description      string    `bson:"description" json:"description" validate:"max=120"`
 	ReviewsRatingSum int64     `bson:"reviews_rating_sum" json:"reviews_rating_sum"`
 	ReviewsCount     int64     `bson:"reviews_count" json:"reviews_count"`

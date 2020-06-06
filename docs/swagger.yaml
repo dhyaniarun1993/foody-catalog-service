@@ -1,0 +1,866 @@
+swagger: "2.0"
+host: localhost:3000
+schemes:
+  - http
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This provides the documentation of the foody catalog service apis.
+  termsOfService: http://swagger.io/terms/
+  title: Foody Catalog API
+  version: "1.0"
+definitions:
+  ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  Address:
+    properties:
+      city:
+        type: string
+      country:
+        type: string
+      location:
+        $ref: '#/definitions/GeoJSON'
+        type: object
+      pincode:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+    required:
+    - city
+    - country
+    - location
+    - pincode
+    - state
+    - street
+    type: object
+  Fees:
+    properties:
+      fee:
+        $ref: '#/definitions/Price'
+        type: object
+      name:
+        type: string
+    required:
+    - fee
+    - name
+    type: object
+  Category:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      restaurant_id:
+        type: string
+      description:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+    required:
+      - id
+      - name
+      - restaurant_id
+  Variant:
+    properties:
+      id:
+        type: string
+      product_id:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      price:
+        $ref: '#/definitions/Price'
+        type: object
+      in_stock:
+        type: boolean
+      created_at: 
+        type: string
+      updated_at: 
+        type: string
+    required:
+      - id
+      - product_id
+      - name
+      - description
+      - price
+      - in_stock
+      - created_at
+      - updated_at
+  Product:
+    properties:
+      id:
+        type: string
+      restaurant_id:
+        type: string
+      category_id:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      is_veg:
+        type: boolean
+      in_stock:
+        type: boolean
+      variants:
+        type: array
+        items:
+          $ref: '#/definitions/Variant'
+      created_at:
+        type: string
+      updated_at:
+        type: string
+    required:
+      - id
+      - restaurant_id
+      - category_id
+      - name
+      - variants
+      - is_veg
+      - in_stock
+  GeoJSON:
+    properties:
+      coordinates:
+        items:
+          type: number
+        type: array
+    required:
+    - coordinates
+    type: object
+  Price:
+    properties:
+      amount:
+        type: number
+      currency:
+        type: string
+    required:
+    - amount
+    - currency
+    type: object
+  Restaurant:
+    properties:
+      address:
+        $ref: '#/definitions/Address'
+        type: object
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_open:
+        type: boolean
+      merchant_id:
+        type: string
+      name:
+        type: string
+      restaurant_fees:
+        $ref: '#/definitions/Fees'
+        type: object
+      reviews_count:
+        type: integer
+      reviews_rating_sum:
+        type: integer
+      updated_at:
+        type: string
+    required:
+    - address
+    - merchant_id
+    - name
+    - restaurant_fees
+    type: object
+paths:
+  /v1/catalog/restaurants:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - merchant_id
+            - name
+            - is_open
+            - restaurant_fees
+            - address
+          properties:
+            merchant_id:
+              type: string
+            name:
+              type: string
+            is_open:
+              type: boolean
+            restaurant_fees:
+              type: object
+              properties:
+                fee:
+                  type: object
+                  properties:
+                    amount:
+                      type: number
+                    currency:
+                      type: string
+                  required:
+                    - amount
+                    - currency
+                name:
+                  type: string
+              required:
+                - fee
+                - name
+            address:
+              type: object
+              properties:
+                street:
+                  type: string
+                city:
+                  type: string
+                state:
+                  type: string
+                country:
+                  type: string
+                pincode:
+                  type: string
+                location:
+                  type: object
+                  properties:
+                    coordinates:
+                      type: array
+                      items:
+                        type: number
+                      minItems: 2
+                      maxItems: 2
+                  required:
+                    -  coordinates
+              required:
+                - street
+                - city
+                - state
+                - country
+                - pincode
+                - location
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success
+          schema:
+            $ref: '#/definitions/Restaurant'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Creates a new restaurant
+      tags:
+      - Restaurant
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: page number 
+        in: query
+        name: pageNumber
+        type: integer
+      - description: page size
+        in: query
+        name: pageSize
+        type: integer
+      - description: latitude
+        in: query
+        name: latitude
+        type: number
+        required: true
+      - description: longitude
+        in: query
+        name: longitude
+        type: number
+        required: true
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              page_number:
+                type: integer
+              page_size:
+                type: integer
+              total_pages:
+                type: integer
+              restaurants:
+                type: array
+                items:
+                  $ref: '#/definitions/Restaurant'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get Restaurant list near a Coordinates
+      tags:
+      - Restaurant
+  /v1/catalog/restaurants/{restaurantId}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: Id of the restaurant to get
+        in: path
+        name: restaurantId
+        type: string
+        required: true
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/Restaurant'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get a Restaurant by Id
+      tags:
+      - Restaurant
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: Id of the restaurant to delete
+        in: path
+        name: restaurantId
+        type: string
+        required: true
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Success. Restaurant and linked products, variants and category are deleted
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Delete a restaurant By Id
+      tags:
+      - Restaurant
+  /v1/catalog/categories:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            restaurant_id:
+              type: string
+          required:
+            - name
+            - restaurant_id
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success
+          schema:
+            $ref: '#/definitions/Category'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create a new Category
+      tags:
+      - Category
+  /v1/catalog/categories/{categoryId}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: Id of the category to get
+        in: path
+        name: categoryId
+        type: string
+        required: true
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/Category'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get a category by Id
+      tags:
+      - Category
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: Id of the category to delete
+        in: path
+        name: categoryId
+        type: string
+        required: true
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Delete a category by Id
+      tags:
+      - Category
+  /v1/catalog/products:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            restaurant_id:
+              type: string
+            category_id:
+              type: string
+            name:
+              type: string
+            description:
+              type: string
+            is_veg:
+              type: boolean
+            in_stock:
+              type: boolean
+            variants:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  price:
+                    $ref: '#/definitions/Price'
+                    type: object
+                  in_stock:
+                    type: boolean
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success
+          schema:
+            $ref: '#/definitions/Product'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create a new Product
+      tags:
+      - Product
+  /v1/catalog/products/{productId}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: Id of the product to get
+        in: path
+        name: productId
+        type: string
+        required: true
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/Product'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get a product by Id
+      tags:
+      - Product
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: Id of the product to delete
+        in: path
+        name: productId
+        type: string
+        required: true
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Delete a product by Id
+      tags:
+      - Product
+  /v1/catalog/products/{productId}/variants:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: Id of the product to which variant will be added
+        in: path
+        name: productId
+        type: string
+        required: true
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+            price:
+              $ref: '#/definitions/Price'
+              type: object
+            in_stock:
+              type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/Variant'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create a new Variant and Add it to product
+      tags:
+      - Product
+  /v1/catalog/products/{productId}/variants/{variantId}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-id
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-user-role
+        type: string
+      - description: user id should be provided if you are running server standalone(without nginx and auth-server). Nginx checks the token with auth server and send this data to downstream service
+        in: header
+        name: x-client-id
+        type: string
+      - description: Id of the product to which varaint is linked
+        in: path
+        name: productId
+        type: string
+        required: true
+      - description: Id of the variant to delete
+        in: path
+        name: variantId
+        type: string
+        required: true
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Delete and Remove variant from a roduct
+      tags:
+      - Product
