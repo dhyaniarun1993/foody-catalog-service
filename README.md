@@ -1,5 +1,5 @@
 # foody-catalog-service
-This project exposes Apis(written in Nodejs) to manage catalog of the foody system.
+This project exposes Apis(written in Golang) to manage catalog of the foody system.
 
 To know about the archotecture of full product, click [here](https://github.com/dhyaniarun1993/foody-documentation "Foody documentation"). 
 
